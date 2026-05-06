@@ -1,0 +1,86 @@
+stop_words = set([
+        "a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
+        "any", "are", "as", "at", "be", "because", "been", "before", "being", "below",
+        "between", "both", "but", "by", "could", "did", "do", "does", "doing", "down",
+        "during", "each", "few", "for", "from", "further", "had", "has", "have", "having",
+        "he", "her", "here", "hers", "herself", "him", "himself", "his", "how", "i",
+        "if", "in", "into", "is", "it", "its", "itself", "just", "me", "more", "most",
+        "my", "myself", "no", "nor", "not", "now", "of", "off", "on", "once", "only",
+        "or", "other", "our", "ours", "ourselves", "out", "over", "own", "same", "she",
+        "should", "so", "some", "such", "than", "that", "the", "their", "theirs",
+        "them", "themselves", "then", "there", "these", "they", "this", "those",
+        "through", "to", "too", "under", "until", "up", "very", "was", "we", "were",
+        "what", "when", "where", "which", "while", "who", "whom", "why", "will",
+        "with", "you", "your", "yours", "yourself", "yourselves"
+    ])
+
+abbreviations_list = set([
+"Mr.", "Mrs.", "Ms.", "Dr.", "Prof.", "Sr.", "Jr.", "Rev.", "Hon.", "Pres.",
+"Gov.", "Sen.", "Rep.", "Lt.", "Col.", "Gen.", "Capt.", "Cmdr.", "Sgt.", "Cpl.",
+"Pvt.", "Adm.", "Maj.", "St.", "Mt.", "Ft.", "Ave.", "Blvd.", "Rd.", "Ln.",
+"Dr.", "Ct.", "Sq.", "Pl.", "Terr.", "Hwy.", "Exp.", "Dept.", "Univ.", "Inst.",
+"Assoc.", "Corp.", "Inc.", "Ltd.", "Co.", "LLC.", "PLC.", "Est.", "Fig.", "Eq.",
+"Ref.", "Refs.", "Vol.", "No.", "Nos.", "pp.", "p.", "Ch.", "Sec.", "Art.",
+"Ann.", "Ed.", "Trans.", "Rev.", "vs.", "etc.", "e.g.", "i.e.", "cf.", "viz.",
+"approx.", "esp.", "incl.", "excl.", "min.", "max.", "avg.", "temp.", "dept.",
+"info.", "misc.", "calc.", "est.", "orig.", "alt.", "def.", "init.", "opt.",
+"param.", "var.", "const.", "func.", "arg.", "args.", "cmd.", "cfg.", "env.",
+"pkg.", "lib.", "mod.", "db.", "tbl.", "col.", "idx.", "req.", "res.",
+"auth.", "admin.", "usr.", "pwd.", "acct.", "bal.", "amt.", "qty.", "desc.",
+"cat.", "subcat.", "prod.", "inv.", "ord.", "ship.", "addr.", "tel.", "mob.",
+"fax.", "ext.", "msg.", "appt.", "sched.", "mtg.", "hrs.", "mins.", "secs.",
+"wk.", "mo.", "yr.", "yrs.", "Jan.", "Feb.", "Mar.", "Apr.", "Jun.", "Jul.",
+"Aug.", "Sep.", "Sept.", "Oct.", "Nov.", "Dec.", "Mon.", "Tue.", "Tues.",
+"Wed.", "Thu.", "Thur.", "Thurs.", "Fri.", "Sat.", "Sun.", "AM.", "PM.",
+"a.m.", "p.m.", "UTC.", "GMT.", "IST.", "EST.", "PST.", "CST.", "MST.",
+"kg.", "g.", "mg.", "lb.", "oz.", "km.", "m.", "cm.", "mm.", "mi.",
+"yd.", "ft.", "in.", "sq.", "cu.", "l.", "ml.", "cc.", "°C.", "°F.",
+"sec.", "min.", "hr.", "wk.", "yr.", "bps.", "kbps.", "mbps.", "gbps.",
+"Hz.", "kHz.", "MHz.", "GHz.", "V.", "kV.", "mV.", "A.", "mA.", "W.",
+"kW.", "MW.", "J.", "kJ.", "cal.", "kcal.", "mol.", "atm.", "bar.", "Pa.",
+"psi.", "rpm.", "fps.", "dpi.", "ppi.", "ISO.", "ANSI.", "IEEE.", "HTML.",
+"CSS.", "JS.", "JSON.", "XML.", "API.", "SDK.", "CLI.", "GUI.", "UI.", "UX.",
+"DBMS.", "SQL.", "NoSQL.", "OS.", "CPU.", "GPU.", "RAM.", "ROM.", "SSD.",
+"HDD.", "LAN.", "WAN.", "VPN.", "IP.", "TCP.", "UDP.", "HTTP.", "HTTPS.",
+"FTP.", "SMTP.", "DNS.", "URL.", "URI.", "MAC.", "ID.", "UID.", "UUID.",
+"QR.", "RFID.", "NFC.", "IoT.", "AI.", "ML.", "DL.", "NLP.", "CV.", "RL.",
+"AR.", "VR.", "XR.", "3D.", "2D.", "CAD.", "CAM.", "CAE.", "BIM.",
+"KPI.", "ROI.", "OKR.", "ETA.", "ETD.", "ETC.", "FYI.", "ASAP.", "DIY.",
+"TBD.", "TBA.", "IMO.", "IMHO.", "AKA.", "FAQ.", "RSVP.", "DOB.", "SSN.",
+"PIN.", "OTP.", "UPI.", "IFSC.", "GST.", "PAN.", "TIN.", "VAT.", "CIF.",
+"FOB.", "B2B.", "B2C.", "C2C.", "HR.", "PR.", "R&D.", "QA.", "QC.", "IT.",
+"OPS.", "FIN.", "MKT.", "ENG.", "DEV.", "SUPP.", "CS.", "CRM.", "ERP.",
+"POS.", "SCM.", "BI.", "KYC.", "AML.", "IPO.", "EPS.", "NAV.", "P/E.",
+"YoY.", "MoM.", "QoQ.", "YTD.", "MTD.", "LTD.", "N/A.", "T&C.", "EOD.",
+"EOM.", "COB.", "OOO.", "WFH.", "WFO.", "PTO.", "SOP.", "BOM.", "EPC.",
+"OEM.", "ODM.", "SKU.", "UPC.", "EAN.", "ISBN.", "ISSN.", "DOI.",
+"PhD.", "MD.", "MBA.", "BSc.", "MSc.", "BA.", "MA.", "BCom.", "MCom.",
+"LLB.", "LLM.", "BTech.", "MTech.", "CA.", "CPA.", "CFA.", "FRM.",
+"KG.", "LKG.", "UKG.", "Std.", "Univ.", "Dept.", "Lab.", "Lib.",
+"Govt.", "Pvt.", "Ltd.", "Min.", "Secy.", "Dir.", "Mgr.", "Asst.",
+"Sr.", "Jr.", "Exec.", "Off.", "Supv.", "Coord.", "Spec.", "Tech.",
+"Engr.", "Acct.", "Clerk.", "Cust.", "Emp.", "Client.", "Vendor.",
+"Intl.", "Dom.", "Reg.", "Loc.", "Natl.", "Dist.", "Div.", "Br.",
+"Ctrl.", "Sys.", "Net.", "Serv.", "Plat.", "App.", "Prog.", "Dev.",
+"Test.", "Build.", "Rel.", "Ver.", "Patch.", "Hotfix.", "Bug.",
+"Feat.", "Req.", "Spec.", "Doc.", "Note.", "Msg.", "Log.", "Hist.",
+"Temp.", "Perm.", "Init.", "Final.", "Curr.", "Prev.", "Next.",
+"Opt.", "Alt.", "Def.", "Std.", "Adv.", "Ext.", "Int.", "Gen.",
+"Spec.", "Misc.", "Add.", "Sub.", "Mult.", "Div.", "Avg.",
+"Max.", "Min.", "Tot.", "Cnt.", "Num.", "Val.", "Idx.",
+"Arr.", "Str.", "Obj.", "Cls.", "Pkg.", "Mod.", "Lib.",
+"Env.", "Cfg.", "Var.", "Const.", "Func.", "Arg.", "Ret."
+])
+
+
+vocab_statements = [
+    (20, "Very repetitive vocabulary"),
+    (40, "Limited vocabulary"),
+    (60, "Balanced vocabulary"),
+    (80, "Diverse vocabulary"),
+    (100, "Highly varied vocabulary")
+    ]
+
+reading_wpm = 250 # The average adult silent reading speed for English is approximately 238–260 words per minute (wpm).
+speaking_wpm = 160 # 130 to 180 WPM is the standard speaking range for an adult.
+buffer_time = 1.10 # 10% buffer for breathing and emphasis.
