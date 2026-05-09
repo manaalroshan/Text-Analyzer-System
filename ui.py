@@ -60,7 +60,7 @@ def print_frequency_statistics(result):
         print(f"{index+1}. {word:<15}→{count:>2} times")
         
     # Top keywords(Stop Words Excluded)
-    print("Top 5 keywords(No stop words)")
+    print("Top 5 keywords(Stopwords Excluded)")
     for index, (word, count) in enumerate(result['top_keywords']):
         print(f"{index+1}. {word:<15}→{count:>2} times")
         
