@@ -10,7 +10,7 @@ Built from scratch to strengthen understanding of core text processing, system d
 
 ## 🎯 About This Project
 
-This project began as a simple text processing script and evolved through iterative improvements into a structured, layered system through **continuous refactoring**.
+This project began as a simple text processing script and evolved into a structured, layered system through **continuous refactoring**.
 
 Rather than designing a perfect architecture from the start, I let the system emerge organically:
 - Started with basic functionality
