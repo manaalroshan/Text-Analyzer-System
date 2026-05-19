@@ -1,5 +1,4 @@
 import string
-import sys
 from config import stop_words, abbreviations_list, vocab_statements, reading_wpm, speaking_wpm, buffer_time
 
 # This Function Cleans the text and returns punctuation free text.
@@ -127,9 +126,9 @@ def get_paragraph_statistics(text, sentence_count):
         "avg_sentence_para": avg_sentence_para,
     }
 
-def build_word_frequency(text):
+def build_word_frequency(words):
     word_frequency_dict = {}
-    for word in text:
+    for word in words:
         word_frequency_dict[word] = word_frequency_dict.get(word, 0) + 1
     return word_frequency_dict
 
@@ -222,7 +221,7 @@ def analyze_text(text):
     # Word Frequency Based Metrics
     frequency_layer = analyze_frequency_layer(words, stop_words)
     
-    # Lexical Later
+    # Lexical Layer
     lexical_layer = analyze_lexical_layer(word_layer['word_count'], word_layer['unique_words'], vocab_statements)
     
     # Sentence Layer
