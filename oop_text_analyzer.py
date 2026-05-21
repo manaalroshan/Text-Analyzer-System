@@ -42,7 +42,7 @@ class TextCleaner:
         return [len(i.split()) for i in text]
     
     @staticmethod
-    def build_word_frequency(words):
+    def build_word_frequency_map(words):
         """Builds a dictionary mapping each word to its frequency."""
         word_frequency_dict = {}
         for word in words:
@@ -63,7 +63,7 @@ class AnalysisContext:
         # Preprocessed words (punctuation removed, lowercased)
         self.processed_words = TextCleaner.split_text_into_words(text)  
         # Frequency map of all words
-        self.word_frequency_map = TextCleaner.build_word_frequency(self.processed_words)
+        self.word_frequency_map = TextCleaner.build_word_frequency_map(self.processed_words)
         # Sorted list of (word, count) tuples by frequency
         self.sorted_word_frequency_list = TextCleaner.sort_word_frequency_list(self.word_frequency_map)
         # Text with abbreviations normalized for better sentence detection

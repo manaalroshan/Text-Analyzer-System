@@ -1,5 +1,3 @@
-from oop_text_analyzer import AnalyzerApp
-
 # This class is responsible for formatting and printing the text analysis report.
 class TextAnalysisReport:
     def __init__(self, divider_char="-", divider_length=50):
@@ -14,7 +12,7 @@ class TextAnalysisReport:
     def print_word_stats(self, word_data):
         if not word_data: return
         print("Word Based Stats:")
-        print(f"Total Words: {word_data["word_count"]}")
+        print(f"Total Words: {word_data['word_count']}")
         print(f"Unique Words: {word_data['unique_word_count']}")
         print(f"Longest Word: '{word_data['longest_word']}' ({word_data['length_longest_word']} letters long)")
         print(self.divider)
@@ -60,7 +58,7 @@ class TextAnalysisReport:
                 print(f"{index+1}. {w:<15} → {c:>2} times")
         
         if freq_data['top_keywords']:
-            print("\nTop 5 Keywords (No stop words):")
+            print("\nTop 5 Keywords (Stop words Excluded):")
             for index, (w, c) in enumerate(freq_data['top_keywords']):
                 print(f"{index+1}. {w:<15} → {c:>2} times")
         print(self.divider)

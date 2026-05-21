@@ -1,5 +1,3 @@
-from text_analyzer import analyze_text
-
 def print_header():
     print("\nText Analysis Report")
     print("-"*50)
