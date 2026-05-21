@@ -1,28 +1,40 @@
 import string
 from config import stop_words, abbreviations_list, reading_wpm, speaking_wpm, buffer_time
+from abc import ABC, abstractmethod
 
-class Analyzer:
+# Abstract base class for all analyzers, defining the interface for analysis.
+class Analyzer(ABC):
+    @abstractmethod
     def analyze(self, context):
-        raise NotImplementedError
+        """
+        Analyzes the given context and returns a dictionary of results.
+        Each concrete analyzer must implement this method.
+        """
+        pass
 
+# Helper class containing static methods for common text cleaning and preprocessing tasks.
 class TextCleaner:
     @staticmethod
     def remove_punctuation(text):
+        """Removes punctuation from the text, preserving apostrophes and hyphens."""
         modified_punctuation = string.punctuation.replace("'", "").replace("-", "")
         return text.translate(str.maketrans("","", modified_punctuation)).lower()
     
     @staticmethod
     def split_text_into_words(text):
+        """Cleans text by removing punctuation and then splits it into a list of words."""
         return TextCleaner.remove_punctuation(text).split()
     
     @staticmethod
     def normalize_abbreviations(text, abbreviations_list):
+        """Removes periods from recognized abbreviations to prevent false sentence breaks."""
         words_list = text.strip().split()
         new_word_list = [word.replace(".", "") if word in abbreviations_list else word for word in words_list]
         return " ".join(new_word_list)
     
     @staticmethod
     def get_sentence_wordcount_list(normalized_text):
+        """Splits text into sentences and returns a list of word counts for each sentence."""
         # Now will Calculate Min and Mix words sentences.
         # First we gonna split the paragraph into sentences and store the numbers of words per sentence in a list.
         text = normalized_text.replace("?", ".").replace("!", ".").split(".")
@@ -31,32 +43,42 @@ class TextCleaner:
     
     @staticmethod
     def build_word_frequency(words):
+        """Builds a dictionary mapping each word to its frequency."""
         word_frequency_dict = {}
         for word in words:
             word_frequency_dict[word] = word_frequency_dict.get(word, 0) + 1
         return word_frequency_dict
         
     @staticmethod
-    def sort_word_frequency(freq_dict):
+    def sort_word_frequency_list(freq_dict): # Renamed for clarity
+        """Sorts a word frequency dictionary into a list of (word, count) tuples in descending order."""
         sorted_frequency_list = list(freq_dict.items())
         sorted_frequency_list.sort(reverse=True, key=lambda x:x[1])
         return sorted_frequency_list
-    
+ 
+# AnalysisContext acts as a shared data store for all analyzers, holding raw text and preprocessed data.   
 class AnalysisContext:
     def __init__(self, text):
         self.raw_text = text
-        self.words = TextCleaner.split_text_into_words(text)  
-        self.word_frequency = TextCleaner.build_word_frequency(self.words)
-        self.sorted_frequency = TextCleaner.sort_word_frequency(self.word_frequency)
-        self.normalized_abbr = TextCleaner.normalize_abbreviations(text, abbreviations_list)
-        self.sentence_wordcount = TextCleaner.get_sentence_wordcount_list(self.normalized_abbr)
+        # Preprocessed words (punctuation removed, lowercased)
+        self.processed_words = TextCleaner.split_text_into_words(text)  
+        # Frequency map of all words
+        self.word_frequency_map = TextCleaner.build_word_frequency(self.processed_words)
+        # Sorted list of (word, count) tuples by frequency
+        self.sorted_word_frequency_list = TextCleaner.sort_word_frequency_list(self.word_frequency_map)
+        # Text with abbreviations normalized for better sentence detection
+        self.text_with_normalized_abbreviations = TextCleaner.normalize_abbreviations(text, abbreviations_list)
+        # List of word counts for each sentence
+        self.sentence_wordcount = TextCleaner.get_sentence_wordcount_list(self.text_with_normalized_abbreviations)
         self.results = {}
   
-    
+# Concrete Analyzer classes --------------------------   
+
+# Analyzes word-based statistics such as total words, unique words, and the longest word.
 class WordAnalyzer(Analyzer):
     def analyze(self, context):
-        words = context.words
-        if not words:
+        words = context.processed_words
+        if not words: # Handle case where no valid words are found
             raise ValueError("Input text contains no valid words")
         longest_word = max(words, key=len)
         
@@ -67,6 +89,7 @@ class WordAnalyzer(Analyzer):
             "length_longest_word": len(longest_word)
         }
 
+# Analyzes character-based statistics, counting characters with and without spaces.
 class CharacterAnalyzer(Analyzer):
     def analyze(self, context):
         raw_text = context.raw_text
@@ -75,6 +98,7 @@ class CharacterAnalyzer(Analyzer):
             "char_count_without_spaces": len("".join(raw_text.split()))
         }
         
+# Analyzes lexical metrics like reading time, speaking time, and vocabulary richness.
 class LexicalAnalyzer(Analyzer):
     def __init__(self, reading_wpm, speaking_wpm, buffer_time):
         self.reading_wpm = reading_wpm
@@ -82,57 +106,59 @@ class LexicalAnalyzer(Analyzer):
         self.buffer_time = buffer_time
         
     def analyze(self, context):
+        # Requires WordAnalyzer results to calculate lexical metrics.
         try:
             word_stats = context.results["WordAnalyzer"]
         except KeyError:
             raise RuntimeError("LexicalAnalyzer requires WordAnalyzer to run first.")            
         
         return {
-            "reading_time": 60 * (word_stats["word_count"] / self.reading_wpm),
-            "speaking_time": (word_stats["word_count"] / self.speaking_wpm) * self.buffer_time * 60,
+            "reading_time": (word_stats["word_count"] / self.reading_wpm) * 60, # Convert to seconds
+            "speaking_time": (word_stats["word_count"] / self.speaking_wpm) * self.buffer_time * 60, # Convert to seconds with buffer
             "vocabulary_score": (word_stats["unique_word_count"] / word_stats["word_count"]) * 100,
         }
         
+# Analyzes word frequencies, identifying most frequent words and keywords (excluding stop words).
 class FrequencyAnalyzer(Analyzer):
     def __init__(self, stop_words):
         self.stop_words = stop_words
         
     def analyze(self, context):
-        sorted_frequency = context.sorted_frequency 
-        if not sorted_frequency:
+        sorted_word_frequency = context.sorted_word_frequency_list # Use the renamed attribute
+        if not sorted_word_frequency:
             return {
             "most_frequent_word": (None, 0),
             "top_words": [],
             "top_keywords": []
             }
         
-        show_words = min(5, len(sorted_frequency)) # for top words
-        top_keywords_list = [(word, count) for word, count in sorted_frequency if word not in self.stop_words]
+        show_words = min(5, len(sorted_word_frequency)) # Determine how many top words to display
+        top_keywords_list = [(word, count) for word, count in sorted_word_frequency if word not in self.stop_words]
         
         return {
-            "most_frequent_word": ((sorted_frequency[0][0], sorted_frequency[0][1])),
-            "top_words": [((sorted_frequency[i][0], sorted_frequency[i][1])) for i in range(show_words)],
+            "most_frequent_word": ((sorted_word_frequency[0][0], sorted_word_frequency[0][1])),
+            "top_words": [((sorted_word_frequency[i][0], sorted_word_frequency[i][1])) for i in range(show_words)],
             "top_keywords": top_keywords_list[:5]
         }
   
+# Analyzes sentence-based statistics, including total sentences, and min/max/average word/character counts per sentence.
 class SentenceAnalyzer(Analyzer):
     def analyze(self, context):
         
         sentence_count = 0
         punctuation_list = ["?", ".", "!"]
-        """I am gonna Use a heuristic to get the sentence count that is [Full stop + Space + Capital Letter = End of the sentence]
-        We will increase the count if that happens.
-        So for First sentence we gonna manually check if user entered valid letters and names or punctuations only.
-        If we find atleast one valid character we gonna increase the count to 1."""
+        # Heuristic for sentence counting:
+        # 1. Initialize count to 1 if any alphanumeric character exists (assuming at least one sentence).
+        # 2. Increment count for patterns like "[.!?] + space + uppercase letter".
     
-        valid_letter = any(i.isalnum() for i in context.normalized_abbr)
+        valid_letter = any(i.isalnum() for i in context.text_with_normalized_abbreviations)
         if valid_letter:
             sentence_count = 1
             
-        # Now our heuristic part 
-        for i in range(len(context.normalized_abbr)-2):
-            if context.normalized_abbr[i] in punctuation_list:
-                if context.normalized_abbr[i+1] == " " and context.normalized_abbr[i+2].isupper():
+        # Apply heuristic for sentence boundaries
+        for i in range(len(context.text_with_normalized_abbreviations)-2):
+            if context.text_with_normalized_abbreviations[i] in punctuation_list:
+                if context.text_with_normalized_abbreviations[i+1] == " " and context.text_with_normalized_abbreviations[i+2].isupper():
                     sentence_count += 1
                     
         # Max Words in a sentence
@@ -142,6 +168,7 @@ class SentenceAnalyzer(Analyzer):
         min_words_sentence = min(context.sentence_wordcount, default=0) 
         
         # Average characters, Words in a sentence
+        # Requires WordAnalyzer and CharacterAnalyzer results.
         try:
             word_count = context.results['WordAnalyzer']['word_count']
             char_count = context.results['CharacterAnalyzer']['char_count_with_spaces']
@@ -159,16 +186,15 @@ class SentenceAnalyzer(Analyzer):
             "avg_words_sentence": avg_words_sentence,
         }
         
+# Analyzes paragraph-based statistics, counting paragraphs and average sentences per paragraph.
 class ParagraphAnalyzer(Analyzer):
     def analyze(self, context):
-        # Usually the parahgraph start when we press enter two times means a blank line in between so we gonna build
-        # on that heuristic or logic.
-        
-        # Text Processing Stage
+        # Paragraphs are typically separated by blank lines (two consecutive newlines).
         text = context.raw_text.strip().splitlines()
         
-        # We are using blank lines to separate paragraphs.
-        # Each time we encounter a blank line, we add the current paragraph
+        # Logic to identify paragraphs based on blank lines.
+        # A paragraph is a sequence of non-empty lines.
+        # When a blank line is encountered, the current accumulated lines form a paragraph.
         # to the paragraph list and then reset the current paragraph buffer.
         # After processing all lines, if anything remains in the current buffer,
         # we add it as the last paragraph.
@@ -184,6 +210,7 @@ class ParagraphAnalyzer(Analyzer):
         if current_paragraph:
             paragraphs.append(current_paragraph)
          
+        # Requires SentenceAnalyzer results for average sentences per paragraph.
         try:   
             sentence_count = context.results['SentenceAnalyzer']['sentence_count']
         except KeyError:
@@ -196,7 +223,7 @@ class ParagraphAnalyzer(Analyzer):
             "avg_sentence_para": avg_sentence_para,
         }  
         
-    
+# AnalyzerEngine orchestrates the execution of multiple Analyzer instances.
 class AnalyzerEngine:
     def __init__(self):
         self.analyzers = []
@@ -205,14 +232,16 @@ class AnalyzerEngine:
         self.analyzers.append(analyzer)
         
     def run(self, text):
+        """Executes all added analyzers on the given text, storing results in the context."""
         context = AnalysisContext(text)
 
         for analyzer in self.analyzers:
+            # Store results in the context, keyed by the analyzer's class name.
             context.results[type(analyzer).__name__] = analyzer.analyze(context)
         return context.results
     
     
-# Flow of Data should remain intact for this to work as some analyzers are coupled.
+# AnalyzerApp is the main entry point for the text analysis system.
 class AnalyzerApp:
     def __init__(self):
         self.engine = AnalyzerEngine()
@@ -224,6 +253,7 @@ class AnalyzerApp:
         self.engine.add_analyzer(ParagraphAnalyzer())
         
     def analyze(self, text):
+        """Initiates the analysis process and handles potential errors."""
         try:
             return self.engine.run(text)
         except ValueError:
