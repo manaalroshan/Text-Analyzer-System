@@ -1,95 +1,96 @@
-def print_header():
-    print("\nText Analysis Report")
-    print("-"*50)
-    return
-
-def print_word_statistics(result):
-    print("Word Based Stats:")
-    print(f"Total Words: {result['word_count']}")
-    print(f"Unique Words: {result['unique_words']}")
-    print(f"Longest Word: {result['longest_word']}, {result['longest_word_length']} letters long.")
-    print("-"*50)
+# This class is responsible for formatting and printing the text analysis report.
+class TextAnalysisReport:
+    def __init__(self, divider_char="-", divider_length=50):
+        self.divider = divider_char * divider_length
     
-def print_character_statistics(result):
-    print("Character Stats:")
-    print(f"Total Characters (without spaces): {result['char_count_no_spaces']}")
-    print(f"Total Characters (with spaces): {result['char_count_with_spaces']}")
-    print("-"*50)
-
-def print_sentence_statistics(result):
-    print("Sentence Based Stats:")
-    print(f"Total Sentences: {result['sentence_count']}")
-    print(f"Longest Sentence (Words): {result['max_words_sentence']}")
-    print(f"Shortest Sentence (Words): {result['min_words_sentence']}")
-    print(f"Avg. Sentence Words: {result['avg_words_sentence']}")
-    print(f"Avg. Sentence Chars: {result['avg_chars_sentence']}")
-    print("-"*50)
-    
-def print_paragraph_statistics(result):
-    print("Paragraph Stats:")
-    print(f"Total Paragraphs: {result['paragraph_count']}")
-    print(f"Average sentences (per Para.): {result['avg_sentence_para']:.1f}")
-    print("-"*50)
-    
-def print_lexical_statistics(result):
-    print("Lexical Stats:")
-    print(f"Estimated Reading Time: {result['reading_time']:.1f} Seconds.")
-    print(f"Estimated Speaking Time: {result['speaking_time']:.1f} Seconds.")
-    # Vocabulary Richness
-    if result['word_count'] < 20:
-        print(f"Vocabulary Richness: Insufficient data for richness score")
-    else:
-        for limit, remark in result['vocab_statements']:
-            if result['vocab_rich_score'] <= limit:
-                vocab_comments = remark
-                break
-        print(f"Vocabulary Richness: {result['vocab_rich_score']:.2f} ({vocab_comments})")
-    print("-"*50)
-    
-def print_frequency_statistics(result):
-    print("Frequency Based Stats:")
-    # Most Frequent Word
-    word, count = result['most_freq_word']
-    print(f"Most Frequent word: {word}, {count} Times.")
-    
-    # Top words frequency
-    print("Top 5 Frequent Words")
-    for index, (word, count) in enumerate(result["top_words"]):
-        print(f"{index+1}. {word:<15}→{count:>2} times")
+    # Prints the report header.
+    def print_header(self):
+        print("\nText Analysis Report")
+        print(self.divider)
         
-    # Top keywords(Stop Words Excluded)
-    print("Top 5 keywords(Stopwords Excluded)")
-    for index, (word, count) in enumerate(result['top_keywords']):
-        print(f"{index+1}. {word:<15}→{count:>2} times")
+    # Prints statistics related to words.
+    def print_word_stats(self, word_data):
+        if not word_data: return
+        print("Word Based Stats:")
+        print(f"Total Words: {word_data['word_count']}")
+        print(f"Unique Words: {word_data['unique_word_count']}")
+        print(f"Longest Word: '{word_data['longest_word']}' ({word_data['length_longest_word']} letters long)")
+        print(self.divider)
+      
+    # Prints statistics related to characters.
+    def print_character_stats(self, char_data):
+        if not char_data: return
+        print("Character Stats:")
+        print(f"Total Characters (with spaces): {char_data['char_count_with_spaces']}")
+        print(f"Total Characters (without spaces): {char_data['char_count_without_spaces']}")
+        print(self.divider)  
         
-def print_footer():
-    print("-"*50)
-    print("Created By MRX")
-    
-    
-    
-# Prints Output
-def display_results(result):
-    # Header
-    print_header()
-    
-    # Word stats
-    print_word_statistics(result)
-    
-    # Chracter stats
-    print_character_statistics(result)
-    
-    # Sentence stats
-    print_sentence_statistics(result)
-    
-    # Paragraph stats
-    print_paragraph_statistics(result)
-    
-    # Lexical stats
-    print_lexical_statistics(result)
-    
-    # Frequency stats
-    print_frequency_statistics(result)
-    
-    # Footer
-    print_footer()
+    # Prints statistics related to sentences.
+    def print_sentence_stats(self, sentence_data):
+        if not sentence_data: return
+        print("Sentence Based Stats:")
+        print(f"Total Sentences: {sentence_data['sentence_count']}")
+        print(f"Longest Sentence: {sentence_data['max_words_sentence']} Words")
+        print(f"Shortest Sentence: {sentence_data['min_words_sentence']} Words")
+        print(f"Avg. Sentence Length: {sentence_data['avg_words_sentence']:.1f} Words")
+        print(f"Avg. Sentence Characters: {sentence_data['avg_chars_sentence']:.1f} Characters")
+        print(self.divider)
+        
+    # Prints statistics related to paragraphs.
+    def print_paragraph_stats(self, para_data):
+        if not para_data: return
+        print("Paragraph Stats:")
+        print(f"Total Paragraphs: {para_data['paragraph_count']}")
+        print(f"Avg. Sentences per Paragraph: {para_data['avg_sentence_para']:.1f}")
+        print(self.divider)
+        
+    # Prints frequency-based statistics like most frequent words and keywords.
+    def print_frequency_stats(self, freq_data):
+        if not freq_data: return
+        print("Frequency Based Stats:")
+        word, count = freq_data['most_frequent_word']
+        if word:
+            print(f"Most Frequent Word: '{word}' ({count} times)")
+            
+        if freq_data['top_words']:
+            print("\nTop 5 Frequent Words:")
+            for index, (w, c) in enumerate(freq_data['top_words']):
+                print(f"{index+1}. {w:<15} → {c:>2} times")
+        
+        if freq_data['top_keywords']:
+            print("\nTop 5 Keywords (Stop words Excluded):")
+            for index, (w, c) in enumerate(freq_data['top_keywords']):
+                print(f"{index+1}. {w:<15} → {c:>2} times")
+        print(self.divider)
+        
+    # Prints lexical statistics including reading/speaking time and vocabulary richness.
+    def print_lexical_stats(self, lexical_data, vocab_statements, word_stats):
+        if not lexical_data: return
+        print("Lexical Stats:")
+        print(f"Estimated Reading Time: {lexical_data['reading_time']:.1f} Seconds")
+        print(f"Estimated Speaking Time: {lexical_data['speaking_time']:.1f} Seconds")
+        
+        if word_stats['word_count'] < 20:
+            print(f"Vocabulary Richness: Insufficient data for richness score")
+        else:
+            for limit, remark in vocab_statements:
+                if lexical_data['vocabulary_score'] <= limit:
+                    vocab_comments = remark
+                    break
+            print(f"Vocabulary Richness Score: {lexical_data['vocabulary_score']:.2f}% ({vocab_comments})")
+        
+    # Prints the report footer.
+    def print_footer(self):
+        print(self.divider)
+        print("REPORT ENDED")
+        
+    # Orchestrates the display of the entire report by calling individual print methods.
+    def display_report(self, results, vocab_statements):
+        self.print_header()
+        self.print_word_stats(results.get('WordAnalyzer'))
+        self.print_character_stats(results.get('CharacterAnalyzer'))
+        self.print_sentence_stats(results.get('SentenceAnalyzer'))
+        self.print_paragraph_stats(results.get('ParagraphAnalyzer'))
+        self.print_frequency_stats(results.get('FrequencyAnalyzer'))
+        self.print_lexical_stats(results.get('LexicalAnalyzer'), vocab_statements, results.get('WordAnalyzer'))
+        self.print_footer()

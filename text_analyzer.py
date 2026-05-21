@@ -1,240 +1,260 @@
 import string
-from config import stop_words, abbreviations_list, vocab_statements, reading_wpm, speaking_wpm, buffer_time
+from config import stop_words, abbreviations_list, reading_wpm, speaking_wpm, buffer_time
+from abc import ABC, abstractmethod
 
-# This Function Cleans the text and returns punctuation free text.
-def remove_punctuation(text):
-    modified_punctuation = string.punctuation.replace("'", "").replace("-", "")
-    no_punctuation_text = text.translate(str.maketrans("","", modified_punctuation)).lower()
-    return no_punctuation_text
+# Abstract base class for all analyzers, defining the interface for analysis.
+class Analyzer(ABC):
+    @abstractmethod
+    def analyze(self, context):
+        """
+        Analyzes the given context and returns a dictionary of results.
+        Each concrete analyzer must implement this method.
+        """
+        pass
 
-# This Funtions retuns a words list
-def split_text_into_words(text):
-    return text.split()
-
-# This Function Analyzes word metric and return them into a dictionary
-def compute_word_statistics(text_words):
-    # Unique Words
-    unique_word_set = set(text_words)
+# Helper class containing static methods for common text cleaning and preprocessing tasks.
+class TextCleaner:
+    @staticmethod
+    def remove_punctuation(text):
+        """Removes punctuation from the text, preserving apostrophes and hyphens."""
+        modified_punctuation = string.punctuation.replace("'", "").replace("-", "")
+        return text.translate(str.maketrans("","", modified_punctuation)).lower()
     
-    # Longest Word
-    longest_word = max(text_words, key=len)
-
-    return {
-        "word_count": len(text_words),
-        "unique_words": len(unique_word_set),
-        "longest_word": longest_word,
-        "longest_word_length": len(longest_word),
-    }
+    @staticmethod
+    def split_text_into_words(text):
+        """Cleans text by removing punctuation and then splits it into a list of words."""
+        return TextCleaner.remove_punctuation(text).split()
     
-def compute_lexical_metrics(word_count, unique_words):
-    return {
-        "reading_time": 60 * (word_count/reading_wpm),
-        "speaking_time": (word_count / speaking_wpm) * buffer_time * 60,
-        "vocab_score": (unique_words / word_count) * 100,
-    }
+    @staticmethod
+    def normalize_abbreviations(text, abbreviations_list):
+        """Removes periods from recognized abbreviations to prevent false sentence breaks."""
+        words_list = text.strip().split()
+        new_word_list = [word.replace(".", "") if word in abbreviations_list else word for word in words_list]
+        return " ".join(new_word_list)
     
-# Calculate total Characters 
-def count_characters(text):
-    char_count_nospace = len("".join(text.split())) # Removes all type of whitespaces.
-    char_count_withspace = len(text)
+    @staticmethod
+    def get_sentence_wordcount_list(normalized_text):
+        """Splits text into sentences and returns a list of word counts for each sentence."""
+        # Now will Calculate Min and Mix words sentences.
+        # First we gonna split the paragraph into sentences and store the numbers of words per sentence in a list.
+        text = normalized_text.replace("?", ".").replace("!", ".").split(".")
+        text = [i.strip() for i in text if i.strip()]
+        return [len(i.split()) for i in text]
     
-    return char_count_nospace, char_count_withspace
-
-def normalize_abbreviations(text):
-    words_list = text.strip().split()
-    new_word_list = [word.replace(".", "") if word in abbreviations_list else word for word in words_list]
-    return " ".join(new_word_list)
-
-def compute_sentence_count(text):
-    sentence_count = 0
-    punctuation_list = ["?", ".", "!"]
-    """I am gonna Use a heuristic to get the sentence count that is [Full stop + Space + Capital Letter = End of the sentence]
-    We will increase the count if that happens.
-    So for First sentence we gonna manually check if user entered valid letters and names or punctuations only.
-    If we find atleast one valid character we gonna increase the count to 1."""
-    
-    valid_letter = any(i.isalnum() for i in text)
-    if valid_letter:
-        sentence_count = 1
+    @staticmethod
+    def build_word_frequency_map(words):
+        """Builds a dictionary mapping each word to its frequency."""
+        word_frequency_dict = {}
+        for word in words:
+            word_frequency_dict[word] = word_frequency_dict.get(word, 0) + 1
+        return word_frequency_dict
         
-    # Now our heuristic part 
-    for i in range(len(text)-2):
-        if text[i] in punctuation_list:
-            if text[i+1] == " " and text[i+2].isupper():
-                sentence_count += 1
-    
-    return sentence_count
-    
-def get_sentence_wordcount_list(text):
-    # Now will Calculate Min and Mix words sentences.
-    # First we gonna split the paragraph into sentences and store the numbers of words per sentence in a list.
-    text = text.replace("?", ".").replace("!", ".").split(".")
-    text = [i.strip() for i in text if i.strip()]
-    return [len(i.split()) for i in text]
-    
-# Calculates sentence stats  
-def get_sentence_statistics(chunks_list, sentence_count, char_count, word_count):
-    # Max Words in a sentence
-    max_words_sentence = max(chunks_list, default=0) 
-    
-    # Min Words in a sentence
-    min_words_sentence = min(chunks_list, default=0) 
-    
-    # Average characters, Words in a sentence
-    if sentence_count > 0:
-        avg_chars_sentence = char_count // sentence_count
-        avg_words_sentence = word_count // sentence_count
-    else:
-        avg_chars_sentence = 0
-        avg_words_sentence = 0
-    
-    return {
-        "max_words_sentence": max_words_sentence,
-        "min_words_sentence": min_words_sentence,
-        "avg_chars_sentence": avg_chars_sentence,
-        "avg_words_sentence": avg_words_sentence,
-    }
+    @staticmethod
+    def sort_word_frequency_list(freq_dict): # Renamed for clarity
+        """Sorts a word frequency dictionary into a list of (word, count) tuples in descending order."""
+        sorted_frequency_list = list(freq_dict.items())
+        sorted_frequency_list.sort(reverse=True, key=lambda x:x[1])
+        return sorted_frequency_list
+ 
+# AnalysisContext acts as a shared data store for all analyzers, holding raw text and preprocessed data.   
+class AnalysisContext:
+    def __init__(self, text):
+        self.raw_text = text
+        # Preprocessed words (punctuation removed, lowercased)
+        self.processed_words = TextCleaner.split_text_into_words(text)  
+        # Frequency map of all words
+        self.word_frequency_map = TextCleaner.build_word_frequency_map(self.processed_words)
+        # Sorted list of (word, count) tuples by frequency
+        self.sorted_word_frequency_list = TextCleaner.sort_word_frequency_list(self.word_frequency_map)
+        # Text with abbreviations normalized for better sentence detection
+        self.text_with_normalized_abbreviations = TextCleaner.normalize_abbreviations(text, abbreviations_list)
+        # List of word counts for each sentence
+        self.sentence_wordcount = TextCleaner.get_sentence_wordcount_list(self.text_with_normalized_abbreviations)
+        self.results = {}
+  
+# Concrete Analyzer classes --------------------------   
 
-# Calculates Paragraph stats 
-def get_paragraph_statistics(text, sentence_count):
-    # Usually the parahgraph start when we press enter two times means a blank line in between so we gonna build
-    # on that heuristic or logic.
+# Analyzes word-based statistics such as total words, unique words, and the longest word.
+class WordAnalyzer(Analyzer):
+    def analyze(self, context):
+        words = context.processed_words
+        if not words: # Handle case where no valid words are found
+            raise ValueError("Input text contains no valid words")
+        longest_word = max(words, key=len)
+        
+        return {
+            "word_count": len(words),
+            "unique_word_count": len(set(words)),
+            "longest_word": longest_word,
+            "length_longest_word": len(longest_word)
+        }
+
+# Analyzes character-based statistics, counting characters with and without spaces.
+class CharacterAnalyzer(Analyzer):
+    def analyze(self, context):
+        raw_text = context.raw_text
+        return {
+            "char_count_with_spaces": len(raw_text),
+            "char_count_without_spaces": len("".join(raw_text.split()))
+        }
+        
+# Analyzes lexical metrics like reading time, speaking time, and vocabulary richness.
+class LexicalAnalyzer(Analyzer):
+    def __init__(self, reading_wpm, speaking_wpm, buffer_time):
+        self.reading_wpm = reading_wpm
+        self.speaking_wpm = speaking_wpm
+        self.buffer_time = buffer_time
+        
+    def analyze(self, context):
+        # Requires WordAnalyzer results to calculate lexical metrics.
+        try:
+            word_stats = context.results["WordAnalyzer"]
+        except KeyError:
+            raise RuntimeError("LexicalAnalyzer requires WordAnalyzer to run first.")            
+        
+        return {
+            "reading_time": (word_stats["word_count"] / self.reading_wpm) * 60, # Convert to seconds
+            "speaking_time": (word_stats["word_count"] / self.speaking_wpm) * self.buffer_time * 60, # Convert to seconds with buffer
+            "vocabulary_score": (word_stats["unique_word_count"] / word_stats["word_count"]) * 100,
+        }
+        
+# Analyzes word frequencies, identifying most frequent words and keywords (excluding stop words).
+class FrequencyAnalyzer(Analyzer):
+    def __init__(self, stop_words):
+        self.stop_words = stop_words
+        
+    def analyze(self, context):
+        sorted_word_frequency = context.sorted_word_frequency_list # Use the renamed attribute
+        if not sorted_word_frequency:
+            return {
+            "most_frequent_word": (None, 0),
+            "top_words": [],
+            "top_keywords": []
+            }
+        
+        show_words = min(5, len(sorted_word_frequency)) # Determine how many top words to display
+        top_keywords_list = [(word, count) for word, count in sorted_word_frequency if word not in self.stop_words]
+        
+        return {
+            "most_frequent_word": ((sorted_word_frequency[0][0], sorted_word_frequency[0][1])),
+            "top_words": [((sorted_word_frequency[i][0], sorted_word_frequency[i][1])) for i in range(show_words)],
+            "top_keywords": top_keywords_list[:5]
+        }
+  
+# Analyzes sentence-based statistics, including total sentences, and min/max/average word/character counts per sentence.
+class SentenceAnalyzer(Analyzer):
+    def analyze(self, context):
+        
+        sentence_count = 0
+        punctuation_list = ["?", ".", "!"]
+        # Heuristic for sentence counting:
+        # 1. Initialize count to 1 if any alphanumeric character exists (assuming at least one sentence).
+        # 2. Increment count for patterns like "[.!?] + space + uppercase letter".
     
-    # Text Processing Stage
-    text = text.strip().splitlines()
+        valid_letter = any(i.isalnum() for i in context.text_with_normalized_abbreviations)
+        if valid_letter:
+            sentence_count = 1
+            
+        # Apply heuristic for sentence boundaries
+        for i in range(len(context.text_with_normalized_abbreviations)-2):
+            if context.text_with_normalized_abbreviations[i] in punctuation_list:
+                if context.text_with_normalized_abbreviations[i+1] == " " and context.text_with_normalized_abbreviations[i+2].isupper():
+                    sentence_count += 1
+                    
+        # Max Words in a sentence
+        max_words_sentence = max(context.sentence_wordcount, default=0) 
     
-    # We are using blank lines to separate paragraphs.
-    # Each time we encounter a blank line, we add the current paragraph
-    # to the paragraph list and then reset the current paragraph buffer.
-    # After processing all lines, if anything remains in the current buffer,
-    # we add it as the last paragraph.
-    paragraphs = []
-    current_paragraph = []
-    for line in text:
-        if line.strip():
-            current_paragraph.append(line)
-        else:
-            if current_paragraph:
-                paragraphs.append(current_paragraph)
-                current_paragraph = []
-    if current_paragraph:
-        paragraphs.append(current_paragraph)
+        # Min Words in a sentence
+        min_words_sentence = min(context.sentence_wordcount, default=0) 
+        
+        # Average characters, Words in a sentence
+        # Requires WordAnalyzer and CharacterAnalyzer results.
+        try:
+            word_count = context.results['WordAnalyzer']['word_count']
+            char_count = context.results['CharacterAnalyzer']['char_count_with_spaces']
+        except KeyError:
+            raise RuntimeError("SentenceAnalyzer requires both WordAnalyzer and CharacterAnalyzer to run first.")
+        
+        avg_chars_sentence = char_count / sentence_count if sentence_count > 0 else 0 
+        avg_words_sentence = word_count / sentence_count if sentence_count > 0 else 0
+        
+        return {
+            "sentence_count": sentence_count,
+            "max_words_sentence": max_words_sentence,
+            "min_words_sentence": min_words_sentence,
+            "avg_chars_sentence": avg_chars_sentence,
+            "avg_words_sentence": avg_words_sentence,
+        }
+        
+# Analyzes paragraph-based statistics, counting paragraphs and average sentences per paragraph.
+class ParagraphAnalyzer(Analyzer):
+    def analyze(self, context):
+        # Paragraphs are typically separated by blank lines (two consecutive newlines).
+        text = context.raw_text.strip().splitlines()
+        
+        # Logic to identify paragraphs based on blank lines.
+        # A paragraph is a sequence of non-empty lines.
+        # When a blank line is encountered, the current accumulated lines form a paragraph.
+        # to the paragraph list and then reset the current paragraph buffer.
+        # After processing all lines, if anything remains in the current buffer,
+        # we add it as the last paragraph.
+        paragraphs = []
+        current_paragraph = []
+        for line in text:
+            if line.strip():
+                current_paragraph.append(line)
+            else:
+                if current_paragraph:
+                    paragraphs.append(current_paragraph)
+                    current_paragraph = []
+        if current_paragraph:
+            paragraphs.append(current_paragraph)
          
-    avg_sentence_para = sentence_count / len(paragraphs) if len(paragraphs) > 0 else 0
-    return {
-        "paragraph_count": len(paragraphs),
-        "avg_sentence_para": avg_sentence_para,
-    }
-
-def build_word_frequency(words):
-    word_frequency_dict = {}
-    for word in words:
-        word_frequency_dict[word] = word_frequency_dict.get(word, 0) + 1
-    return word_frequency_dict
-
-def sort_word_frequency(freq_dict):
-    word_freq_list = list(freq_dict.items())
-    word_freq_list.sort(reverse=True, key=lambda x:x[1])
-    return word_freq_list
-    
-def get_frequent_words(freq_list):
-    show_words = min(5, len(freq_list))
-    return [((freq_list[i][0], freq_list[i][1])) for i in range(show_words)]
+        # Requires SentenceAnalyzer results for average sentences per paragraph.
+        try:   
+            sentence_count = context.results['SentenceAnalyzer']['sentence_count']
+        except KeyError:
+            raise RuntimeError("ParagraphAnalyzer requires SentenceAnalyzer to run first.")
+            
+            
+        avg_sentence_para = sentence_count / len(paragraphs) if len(paragraphs) > 0 else 0
+        return {
+            "paragraph_count": len(paragraphs),
+            "avg_sentence_para": avg_sentence_para,
+        }  
         
-def get_most_frequent_word(freq_list):
-    return ((freq_list[0][0], freq_list[0][1]))
-
-def extract_top_keywords(freq_list, stop_words):
-    top_keywords_list = [(word, count) for word, count in freq_list if word not in stop_words]      
-    return top_keywords_list[:5]
-
-# Syster Layering --------------------------------------------------------------------------------------------
-def analyze_frequency_layer(words, stop_words):
-    word_frequency = build_word_frequency(words)
-    sorted_word_frequency = sort_word_frequency(word_frequency)
-
-    return {
-        "top_words": get_frequent_words(sorted_word_frequency), # Top 5 Most Frequent Words
-        "top_keywords": extract_top_keywords(sorted_word_frequency, stop_words), # Top 5 Keywords(No stop Words)
-        "most_freq_word": get_most_frequent_word(sorted_word_frequency) # Most Frequent Word
-    }   
-
-def prepare_text_data(text):
-    clean_text = remove_punctuation(text)
-    words = split_text_into_words(clean_text)
-    return words
-    
-def analyze_word_layer(words):
-    word_stats = compute_word_statistics(words)
-    
-    return {
-    "word_count": word_stats['word_count'],
-    "unique_words": word_stats['unique_words'],
-    "longest_word": word_stats['longest_word'],
-    "longest_word_length": word_stats['longest_word_length'],
-    }
-    
-def analyze_lexical_layer(word_count, unique_words, vocab_statements):
-    text_stats = compute_lexical_metrics(word_count, unique_words)
-    return {
-        "reading_time": text_stats['reading_time'], # Reading Time
-        "speaking_time": text_stats['speaking_time'], # Speaking Time
-        "vocab_rich_score": text_stats['vocab_score'], # Vocabulary Richness (Type Token Ratio)
-        "vocab_statements": vocab_statements,
-    }
-    
-def analyze_character_layer(text):
-    char_count_no_spaces, char_count_with_spaces = count_characters(text)
-    return {
-        "char_count_no_spaces": char_count_no_spaces,
-        "char_count_with_spaces": char_count_with_spaces,
-    }
-    
-def analyze_sentence_layer(text, char_count_with_spaces, word_count):
-    normalized_text = normalize_abbreviations(text)
-    sentence_count = compute_sentence_count(normalized_text) # Sentence count
-    sentence_chunks_list = get_sentence_wordcount_list(normalized_text)
-    sentence_stats = get_sentence_statistics(sentence_chunks_list, sentence_count, char_count_with_spaces, word_count)
-    
-    return {
-        "sentence_count": sentence_count, # Sentence count
-        **sentence_stats
-    }
-    
-def analyze_paragraph_layer(text, sentence_count):
-    return get_paragraph_statistics(text, sentence_count) # Returns a dict
-    
-
-# Manager Function--------------------------------------------------------------------------
-def analyze_text(text):
-    # Getting Punctuation Free Text and Words
-    words = prepare_text_data(text)
-    if not words:
-        return None
-    
-    # Word Layer
-    word_layer = analyze_word_layer(words)
-
-    # Character count
-    character_layer = analyze_character_layer(text)
+# AnalyzerEngine orchestrates the execution of multiple Analyzer instances.
+class AnalyzerEngine:
+    def __init__(self):
+        self.analyzers = []
         
-    # Word Frequency Based Metrics
-    frequency_layer = analyze_frequency_layer(words, stop_words)
+    def add_analyzer(self, analyzer):
+        self.analyzers.append(analyzer)
+        
+    def run(self, text):
+        """Executes all added analyzers on the given text, storing results in the context."""
+        context = AnalysisContext(text)
+
+        for analyzer in self.analyzers:
+            # Store results in the context, keyed by the analyzer's class name.
+            context.results[type(analyzer).__name__] = analyzer.analyze(context)
+        return context.results
     
-    # Lexical Layer
-    lexical_layer = analyze_lexical_layer(word_layer['word_count'], word_layer['unique_words'], vocab_statements)
     
-    # Sentence Layer
-    sentence_layer = analyze_sentence_layer(text, character_layer['char_count_with_spaces'], word_layer["word_count"])
-    
-    # Paragraph Layer
-    paragraph_layer = analyze_paragraph_layer(text, sentence_layer['sentence_count'])
-    
-    return{
-        **word_layer,
-        **character_layer,
-        **lexical_layer,
-        **frequency_layer,
-        **sentence_layer,
-        **paragraph_layer,
-    }
+# AnalyzerApp is the main entry point for the text analysis system.
+class AnalyzerApp:
+    def __init__(self):
+        self.engine = AnalyzerEngine()
+        self.engine.add_analyzer(WordAnalyzer())
+        self.engine.add_analyzer(CharacterAnalyzer())
+        self.engine.add_analyzer(LexicalAnalyzer(reading_wpm, speaking_wpm, buffer_time))
+        self.engine.add_analyzer(FrequencyAnalyzer(stop_words))
+        self.engine.add_analyzer(SentenceAnalyzer())
+        self.engine.add_analyzer(ParagraphAnalyzer())
+        
+    def analyze(self, text):
+        """Initiates the analysis process and handles potential errors."""
+        try:
+            return self.engine.run(text)
+        except ValueError:
+            return None
