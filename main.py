@@ -1,5 +1,5 @@
-from oop_text_analyzer import AnalyzerApp
-from oop_ui import TextAnalysisReport
+from text_analyzer import AnalyzerApp
+from ui import TextAnalysisReport
 from config import vocab_statements
 
 # Initialize the main application logic for text analysis.
