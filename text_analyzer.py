@@ -117,7 +117,7 @@ class AnalysisContext:
         self.sentence_wordcount = TextCleaner.get_sentence_wordcount(self.normalized_abbreviations)
         # Paragraph count logic
         self.paragraph_count = TextCleaner.paragraph_count(self.raw_text)
-        # Stores Analyzer results for context
+        # Stores Analyzer's results for context
         self.results = {}
   
 # Concrete Analyzer classes --------------------------   
@@ -178,7 +178,7 @@ class FrequencyAnalyzer(Analyzer):
         top_keywords = [(word, count) for word, count in sorted_word_frequency if word not in self.stop_words]
         
         return {
-            "most_frequent_word": (sorted_word_frequency[0][0], sorted_word_frequency[0][1]),
+            "most_frequent_word": sorted_word_frequency[0],
             "top_words": [(sorted_word_frequency[i][0], sorted_word_frequency[i][1]) for i in range(show_words)],
             "top_keywords": top_keywords[:5]
         }
@@ -186,44 +186,20 @@ class FrequencyAnalyzer(Analyzer):
 # Analyzes sentence-based statistics, including total sentences, and min/max/average word/character counts per sentence.
 class SentenceAnalyzer(Analyzer):
     def analyze(self, context):                    
-        # Max Words in a sentence
-        max_words_sentence = max(context.sentence_wordcount, default=0) 
-    
-        # Min Words in a sentence
-        min_words_sentence = min(context.sentence_wordcount, default=0) 
-        
-        # Average characters, Words in a sentence
-        # Requires WordAnalyzer and CharacterAnalyzer results.
-        try:
-            word_count = context.results['WordAnalyzer']['word_count']
-            char_count = context.results['CharacterAnalyzer']['char_count_with_spaces']
-        except KeyError:
-            raise RuntimeError("SentenceAnalyzer requires both WordAnalyzer and CharacterAnalyzer to run first.")
-        
-        avg_chars_sentence = char_count / context.sentence_count if context.sentence_count > 0 else 0 
-        avg_words_sentence = word_count / context.sentence_count if context.sentence_count > 0 else 0
-        
         return {
             "sentence_count": context.sentence_count,
-            "max_words_sentence": max_words_sentence,
-            "min_words_sentence": min_words_sentence,
-            "avg_chars_sentence": avg_chars_sentence,
-            "avg_words_sentence": avg_words_sentence,
+            "max_words_sentence": max(context.sentence_wordcount, default=0),
+            "min_words_sentence": min(context.sentence_wordcount, default=0),
+            "avg_chars_sentence": len(context.raw_text) / context.sentence_count if context.sentence_count > 0 else 0,
+            "avg_words_sentence": len(context.words) / context.sentence_count if context.sentence_count > 0 else 0,
         }
     
 # Analyzes paragraph-based statistics, counting paragraphs and average sentences per paragraph.
 class ParagraphAnalyzer(Analyzer):
     def analyze(self, context):
-        # Requires SentenceAnalyzer results for average sentences per paragraph.
-        try:   
-            sentence_count = context.results['SentenceAnalyzer']['sentence_count']
-        except KeyError:
-            raise RuntimeError("ParagraphAnalyzer requires SentenceAnalyzer to run first.")
-            
-        avg_sentence_para = sentence_count / context.paragraph_count if context.paragraph_count > 0 else 0
         return {
             "paragraph_count": context.paragraph_count,
-            "avg_sentence_para": avg_sentence_para,
+            "avg_sentence_para": context.sentence_count / context.paragraph_count if context.paragraph_count > 0 else 0,
         }  
 
 # AnalyzerEngine orchestrates the execution of multiple Analyzer instances.

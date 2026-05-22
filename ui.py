@@ -44,6 +44,23 @@ class TextAnalysisReport:
         print(f"Avg. Sentences per Paragraph: {para_data['avg_sentence_para']:.1f}")
         print(self.divider)
         
+    # Prints lexical statistics including reading/speaking time and vocabulary richness.
+    def print_lexical_stats(self, lexical_data, vocab_statements, word_stats):
+        if not lexical_data: return
+        print("Lexical Stats:")
+        print(f"Estimated Reading Time: {lexical_data['reading_time']:.1f} Seconds")
+        print(f"Estimated Speaking Time: {lexical_data['speaking_time']:.1f} Seconds")
+        
+        if word_stats['word_count'] < 20:
+            print(f"Vocabulary Richness: Insufficient data for richness score")
+        else:
+            for limit, remark in vocab_statements:
+                if lexical_data['vocabulary_score'] <= limit:
+                    vocab_comments = remark
+                    break
+            print(f"Vocabulary Richness Score: {lexical_data['vocabulary_score']:.2f}% ({vocab_comments})")
+        print(self.divider)
+        
     # Prints frequency-based statistics like most frequent words and keywords.
     def print_frequency_stats(self, freq_data):
         if not freq_data: return
@@ -61,23 +78,6 @@ class TextAnalysisReport:
             print("\nTop 5 Keywords (Stop words Excluded):")
             for index, (w, c) in enumerate(freq_data['top_keywords']):
                 print(f"{index+1}. {w:<15} → {c:>2} times")
-        print(self.divider)
-        
-    # Prints lexical statistics including reading/speaking time and vocabulary richness.
-    def print_lexical_stats(self, lexical_data, vocab_statements, word_stats):
-        if not lexical_data: return
-        print("Lexical Stats:")
-        print(f"Estimated Reading Time: {lexical_data['reading_time']:.1f} Seconds")
-        print(f"Estimated Speaking Time: {lexical_data['speaking_time']:.1f} Seconds")
-        
-        if word_stats['word_count'] < 20:
-            print(f"Vocabulary Richness: Insufficient data for richness score")
-        else:
-            for limit, remark in vocab_statements:
-                if lexical_data['vocabulary_score'] <= limit:
-                    vocab_comments = remark
-                    break
-            print(f"Vocabulary Richness Score: {lexical_data['vocabulary_score']:.2f}% ({vocab_comments})")
         
     # Prints the report footer.
     def print_footer(self):
@@ -91,6 +91,6 @@ class TextAnalysisReport:
         self.print_character_stats(results.get('CharacterAnalyzer'))
         self.print_sentence_stats(results.get('SentenceAnalyzer'))
         self.print_paragraph_stats(results.get('ParagraphAnalyzer'))
-        self.print_frequency_stats(results.get('FrequencyAnalyzer'))
         self.print_lexical_stats(results.get('LexicalAnalyzer'), vocab_statements, results.get('WordAnalyzer'))
+        self.print_frequency_stats(results.get('FrequencyAnalyzer'))
         self.print_footer()
