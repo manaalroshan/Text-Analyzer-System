@@ -84,3 +84,8 @@ vocab_statements = [
 reading_wpm = 250 # The average adult silent reading speed for English is approximately 238–260 words per minute (wpm).
 speaking_wpm = 160 # 130 to 180 WPM is the standard speaking range for an adult.
 buffer_time = 1.10 # 10% buffer for breathing and emphasis.
+
+
+# File Paths
+input_path = "inputs/raw_text.txt"
+output_path = "results/text_analysis.txt"

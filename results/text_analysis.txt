@@ -1,0 +1,43 @@
+Text Analysis Report
+-------------------------------------------------------------------------
+Word Based Stats:
+Total Words: 124
+Unique Words: 92
+Longest Word: 'recommendations' (15 letters long)
+-------------------------------------------------------------------------
+Character Stats:
+Total Characters (with spaces): 851
+Total Characters (without spaces): 727
+-------------------------------------------------------------------------
+Sentence Based Stats:
+Total Sentences: 7
+Longest Sentence: 22 Words
+Shortest Sentence: 13 Words
+Avg. Sentence Length: 17.7 Words
+Avg. Sentence Characters: 121.6 Characters
+-------------------------------------------------------------------------
+Paragraph Stats:
+Total Paragraphs: 2
+Avg. Sentences per Paragraph: 3.5
+-------------------------------------------------------------------------
+Lexical Stats:
+Estimated Reading Time: 29.8 Seconds
+Estimated Speaking Time: 51.2 Seconds
+Vocabulary Richness Score: 74.19% (Diverse vocabulary)
+-------------------------------------------------------------------------
+Frequency Based Stats:
+Most Frequent Word: 'and' (9 times)
+
+Top 5 Frequent Words:
+1. and             →  9 times
+2. a               →  4 times
+3. artificial      →  3 times
+4. intelligence    →  3 times
+5. is              →  3 times
+
+Top 5 Keywords (Stopwords Excluded):
+1. artificial      →  3 times
+2. intelligence    →  3 times
+3. ai              →  2 times
+4. cars            →  2 times
+5. page            →  2 times
