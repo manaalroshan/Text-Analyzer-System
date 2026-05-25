@@ -1,5 +1,6 @@
 from text_analyzer import AnalyzerApp
-from ui import TextAnalysisReport, TextAnalysisExport
+from ui import TextAnalysisReport
+from report_generator import TextAnalysisExport
 from config import vocab_statements, input_path
 import os
 import sys
