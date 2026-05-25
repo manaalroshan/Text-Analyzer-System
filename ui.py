@@ -45,21 +45,12 @@ class TextAnalysisReport:
         print(self.divider)
         
     # Prints lexical statistics including reading/speaking time and vocabulary richness.
-    def print_lexical_stats(self, lexical_data, vocab_statements, word_stats):
-        if not lexical_data or not word_stats: return
+    def print_lexical_stats(self, lexical_data):
+        if not lexical_data: return
         print("Lexical Stats:")
         print(f"Estimated Reading Time: {lexical_data['reading_time']:.1f} Seconds")
         print(f"Estimated Speaking Time: {lexical_data['speaking_time']:.1f} Seconds")
-        
-        vocab_comments = "N/A"
-        if word_stats['word_count'] < 20:
-            print(f"Vocabulary Richness: Insufficient data for richness score")
-        else:
-            for limit, remark in vocab_statements:
-                if lexical_data['vocabulary_score'] <= limit:
-                    vocab_comments = remark
-                    break
-            print(f"Vocabulary Richness Score: {lexical_data['vocabulary_score']:.2f}% ({vocab_comments})")
+        print(f"Vocabulary Richness Score: {lexical_data['vocabulary_score']:.2f}% ({lexical_data['vocabulary_remarks']})")
         print(self.divider)
         
     # Prints frequency-based statistics like most frequent words and keywords.
@@ -86,12 +77,12 @@ class TextAnalysisReport:
         print("REPORT ENDED")
         
     # Orchestrates the display of the entire report by calling individual print methods.
-    def display_report(self, results, vocab_statements):
+    def display_report(self, results):
         self.print_header()
         self.print_word_stats(results.get('WordAnalyzer'))
         self.print_character_stats(results.get('CharacterAnalyzer'))
         self.print_sentence_stats(results.get('SentenceAnalyzer'))
         self.print_paragraph_stats(results.get('ParagraphAnalyzer'))
-        self.print_lexical_stats(results.get('LexicalAnalyzer'), vocab_statements, results.get('WordAnalyzer'))
+        self.print_lexical_stats(results.get('LexicalAnalyzer'))
         self.print_frequency_stats(results.get('FrequencyAnalyzer'))
         self.print_footer()

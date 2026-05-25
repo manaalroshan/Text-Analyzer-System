@@ -89,3 +89,4 @@ buffer_time = 1.10 # 10% buffer for breathing and emphasis.
 # File Paths
 input_path = "inputs/raw_text.txt"
 output_path = "results/text_analysis.txt"
+json_output_path = "results/analysis.json"

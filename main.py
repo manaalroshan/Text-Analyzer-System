@@ -1,9 +1,8 @@
 from text_analyzer import AnalyzerApp
 from ui import TextAnalysisReport
-from report_generator import TextAnalysisExport
-from config import vocab_statements, input_path
-import os
-import sys
+from report_generator import ReportGenerator, ReportExporter
+from config import input_path, json_output_path, output_path
+import os, sys
 
 # Initialize the main application logic for text analysis.
 app = AnalyzerApp()
@@ -11,32 +10,41 @@ app = AnalyzerApp()
 # Create or check if there is a folder to load inputs.
 os.makedirs("inputs", exist_ok=True)
 
-# Getting output from a file
+# Attempt to load text from the configured input file path.
 try:
     with open(input_path, "r", encoding="utf-8") as file:
         user_input = file.read()
-        
+
 except FileNotFoundError:
+    # Fallback to manual console input if the file is missing.
     print("Error: 'raw_text.txt' was not found inside the inputs folder.")
     user_input = input("Please Enter text manually: ")
 
 except Exception as e:
+    # Catch-all for unexpected I/O or system errors.
     print(f"Unexpected Error: {e}")
     sys.exit(1)
-    
+
 # Check if the user input is empty or contains only whitespace.
 if not user_input.strip():
     print("Invalid Input: Enter Some Words for Analysis Stats.")
 else:
-    # Perform the text analysis.
+    # Perform the multi-layered text analysis.
     results = app.analyze(user_input)
-    
+
     # If analysis returns None, it means no valid words were found.
     if results is None:
         print("Invalid Input: No Valid Words Found to Analyze. Please try to enter atleast a letter or number.")
     else:
-        # Initialize the report visualizer and display the results.
+        # 1. Console Output: Display the report immediately to the user.
         visualizer = TextAnalysisReport(divider_char="-", divider_length=50)
-        visualizer.display_report(results, vocab_statements)
-        exporter = TextAnalysisExport()
-        exporter.export_report(results, vocab_statements)
+        visualizer.display_report(results)
+
+        # 2. Report Construction: Build a formatted string for file export.
+        generator = ReportGenerator()
+        report = generator.build_report(results)
+
+        # 3. Persistence: Export the raw analysis data (JSON) and the formatted report (TXT).
+        exporter = ReportExporter()
+        exporter.save_json(results, json_output_path)
+        exporter.save_report(report, output_path)

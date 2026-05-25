@@ -1,31 +1,22 @@
-import os
-from config import output_path
-class TextAnalysisExport:
-    def __init__(self):
-        os.makedirs("results", exist_ok=True)
-    
-    def generate_report(self, word_data, char_data, sentence_data, para_data, lexical_data, vocab_statements, freq_data):
+import os, json
+
+class ReportGenerator:
+    """
+    Responsible for transforming raw analysis dictionaries into a structured 
+    and human-readable string format.
+    """
+
+    def generate_report(self, word_data, char_data, sentence_data, para_data, lexical_data, freq_data):
+        """Constructs a formatted string containing all analysis statistics."""
         if not all([word_data, char_data, sentence_data, para_data, lexical_data, freq_data]):
             return
-        #----------------------------------------------
-        # Lexical Preprocesing
-        #----------------------------------------------
-        vocab_comments = "N/A"
-        if word_data['word_count'] < 20:
-            vocab_comments= "Insufficient data for richness score"
-        else:
-            for limit, remark in vocab_statements:
-                if lexical_data['vocabulary_score'] <= limit:
-                    vocab_comments = remark
-                    break
-                
-        #--------------------------------------------------------        
-        # Freq Based stats logic - Fixed iteration bug using join
-        #--------------------------------------------------------
+     
+        # Format frequency statistics into aligned, readable strings.
         word, count = freq_data['most_frequent_word']
         show_top_words = "\n".join([f"{i+1}. {w:<15} → {c:>2} times" for i, (w, c) in enumerate(freq_data['top_words'])])
         show_top_keywords = "\n".join([f"{i+1}. {w:<15} → {c:>2} times" for i, (w, c) in enumerate(freq_data['top_keywords'])])
             
+        # Construct the final string using an f-string for clarity and performance.
         return (
                 "Text Analysis Report\n"
                 "-------------------------------------------------------------------------\n"
@@ -52,7 +43,7 @@ class TextAnalysisExport:
                 "Lexical Stats:\n"
                 f"Estimated Reading Time: {lexical_data['reading_time']:.1f} Seconds\n"
                 f"Estimated Speaking Time: {lexical_data['speaking_time']:.1f} Seconds\n"
-                f"Vocabulary Richness Score: {lexical_data['vocabulary_score']:.2f}% ({vocab_comments})\n"
+                f"Vocabulary Richness Score: {lexical_data['vocabulary_score']:.2f}% ({lexical_data['vocabulary_remarks']})\n"
                 "-------------------------------------------------------------------------\n" 
                 "Frequency Based Stats:\n"
                 f"Most Frequent Word: '{word}' ({count} times)\n"
@@ -62,17 +53,34 @@ class TextAnalysisExport:
                 f"{show_top_keywords}"   
             )
     
-    def save_report(self, report, output_path):
-        with open(output_path, "w", encoding="utf-8") as file:
-            file.write(report)
-    
-    def export_report(self, results, vocab_statements):
+    def build_report(self, results):
+        """High-level method to generate and save the report from analysis results."""
         report = self.generate_report(
             results.get('WordAnalyzer'),
             results.get('CharacterAnalyzer'),
             results.get('SentenceAnalyzer'),
             results.get('ParagraphAnalyzer'),
-            results.get('LexicalAnalyzer'), vocab_statements,
+            results.get('LexicalAnalyzer'),
             results.get('FrequencyAnalyzer')    
         )
-        self.save_report(report, output_path)
+        return report
+        
+class ReportExporter:
+    """Handles the generation and file export of text analysis reports."""
+    
+    def __init__(self):
+        """Initializes the exporter and ensures the output directory exists."""
+        os.makedirs("results", exist_ok=True)
+        
+    def save_report(self, report, output_path):
+        """Writes a string report to a physical text file."""
+        if report is None:
+            return
+            
+        with open(output_path, "w", encoding="utf-8") as file:
+            file.write(report)
+            
+    def save_json(self, results, json_output_path):
+        """Exports the raw results dictionary to a JSON file for machine readability."""
+        with open(json_output_path, "w", encoding="utf-8") as file:
+            json.dump(results, file, indent=4)

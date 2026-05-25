@@ -1,5 +1,5 @@
 import string
-from config import stop_words, abbreviations_list, reading_wpm, speaking_wpm, buffer_time
+from config import stop_words, abbreviations_list, reading_wpm, speaking_wpm, buffer_time, vocab_statements
 from abc import ABC, abstractmethod
 
 # Abstract base class for all analyzers, defining the interface for analysis.
@@ -148,22 +148,35 @@ class CharacterAnalyzer(Analyzer):
         
 # Analyzes lexical metrics like reading time, speaking time, and vocabulary richness.
 class LexicalAnalyzer(Analyzer):
-    def __init__(self, reading_wpm, speaking_wpm, buffer_time):
+    def __init__(self, reading_wpm, speaking_wpm, buffer_time, vocab_statements):
         self.reading_wpm = reading_wpm
         self.speaking_wpm = speaking_wpm
         self.buffer_time = buffer_time
+        self.vocab_statements = vocab_statements
         
     def analyze(self, context):
         # Requires WordAnalyzer results to calculate lexical metrics.
         try:
             word_stats = context.results["WordAnalyzer"]
         except KeyError:
-            raise RuntimeError("LexicalAnalyzer requires WordAnalyzer to run first.")            
+            raise RuntimeError("LexicalAnalyzer requires WordAnalyzer to run first.")
+        
+        vocab_score = (word_stats["unique_word_count"] / word_stats["word_count"]) * 100
+        
+        vocabulary_comments = "N/A"
+        if word_stats['word_count'] < 20:
+            vocabulary_comments= "Insufficient data for richness score"
+        else:
+            for limit, remark in self.vocab_statements:
+                if vocab_score <= limit:
+                    vocabulary_comments = remark
+                    break           
         
         return {
             "reading_time": (word_stats["word_count"] / self.reading_wpm) * 60, # Convert to seconds
             "speaking_time": (word_stats["word_count"] / self.speaking_wpm) * self.buffer_time * 60, # Convert to seconds with buffer
-            "vocabulary_score": (word_stats["unique_word_count"] / word_stats["word_count"]) * 100,
+            "vocabulary_score": vocab_score,
+            "vocabulary_remarks": vocabulary_comments,
         }
         
 # Analyzes word frequencies, identifying most frequent words and keywords (excluding stop words).
@@ -225,7 +238,7 @@ class AnalyzerApp:
         self.engine = AnalyzerEngine()
         self.engine.add_analyzer(WordAnalyzer())
         self.engine.add_analyzer(CharacterAnalyzer())
-        self.engine.add_analyzer(LexicalAnalyzer(reading_wpm, speaking_wpm, buffer_time))
+        self.engine.add_analyzer(LexicalAnalyzer(reading_wpm, speaking_wpm, buffer_time, vocab_statements))
         self.engine.add_analyzer(FrequencyAnalyzer(stop_words))
         self.engine.add_analyzer(SentenceAnalyzer())
         self.engine.add_analyzer(ParagraphAnalyzer())

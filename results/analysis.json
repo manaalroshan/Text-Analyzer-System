@@ -1,0 +1,79 @@
+{
+    "WordAnalyzer": {
+        "word_count": 124,
+        "unique_word_count": 92,
+        "longest_word": "recommendations",
+        "length_longest_word": 15
+    },
+    "CharacterAnalyzer": {
+        "char_count_with_spaces": 851,
+        "char_count_without_spaces": 727
+    },
+    "LexicalAnalyzer": {
+        "reading_time": 29.759999999999998,
+        "speaking_time": 51.150000000000006,
+        "vocabulary_score": 74.19354838709677,
+        "vocabulary_remarks": "Diverse vocabulary"
+    },
+    "FrequencyAnalyzer": {
+        "most_frequent_word": [
+            "and",
+            9
+        ],
+        "top_words": [
+            [
+                "and",
+                9
+            ],
+            [
+                "a",
+                4
+            ],
+            [
+                "artificial",
+                3
+            ],
+            [
+                "intelligence",
+                3
+            ],
+            [
+                "is",
+                3
+            ]
+        ],
+        "top_keywords": [
+            [
+                "artificial",
+                3
+            ],
+            [
+                "intelligence",
+                3
+            ],
+            [
+                "ai",
+                2
+            ],
+            [
+                "cars",
+                2
+            ],
+            [
+                "page",
+                2
+            ]
+        ]
+    },
+    "SentenceAnalyzer": {
+        "sentence_count": 7,
+        "max_words_sentence": 22,
+        "min_words_sentence": 13,
+        "avg_chars_sentence": 121.57142857142857,
+        "avg_words_sentence": 17.714285714285715
+    },
+    "ParagraphAnalyzer": {
+        "paragraph_count": 2,
+        "avg_sentence_para": 3.5
+    }
+}
