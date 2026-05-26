@@ -1,4 +1,5 @@
-import os, json
+import json
+from pathlib import Path
 
 class ReportGenerator:
     """
@@ -6,8 +7,15 @@ class ReportGenerator:
     and human-readable string format.
     """
 
-    def generate_report(self, word_data, char_data, sentence_data, para_data, lexical_data, freq_data):
+    def generate_report(self, results):
         """Constructs a formatted string containing all analysis statistics."""
+        word_data = results.get('WordAnalyzer')
+        char_data = results.get('CharacterAnalyzer')
+        sentence_data = results.get('SentenceAnalyzer')
+        para_data = results.get('ParagraphAnalyzer')
+        lexical_data = results.get('LexicalAnalyzer')
+        freq_data = results.get('FrequencyAnalyzer')
+
         if not all([word_data, char_data, sentence_data, para_data, lexical_data, freq_data]):
             return
      
@@ -55,32 +63,22 @@ class ReportGenerator:
     
     def build_report(self, results):
         """High-level method to generate and save the report from analysis results."""
-        report = self.generate_report(
-            results.get('WordAnalyzer'),
-            results.get('CharacterAnalyzer'),
-            results.get('SentenceAnalyzer'),
-            results.get('ParagraphAnalyzer'),
-            results.get('LexicalAnalyzer'),
-            results.get('FrequencyAnalyzer')    
-        )
-        return report
+        return self.generate_report(results)
         
 class ReportExporter:
     """Handles the generation and file export of text analysis reports."""
     
     def __init__(self):
         """Initializes the exporter and ensures the output directory exists."""
-        os.makedirs("results", exist_ok=True)
+        Path("results").mkdir(exist_ok=True)
         
     def save_report(self, report, output_path):
         """Writes a string report to a physical text file."""
         if report is None:
             return
-            
-        with open(output_path, "w", encoding="utf-8") as file:
-            file.write(report)
+        output_path.write_text(report, encoding="utf-8")
             
     def save_json(self, results, json_output_path):
         """Exports the raw results dictionary to a JSON file for machine readability."""
-        with open(json_output_path, "w", encoding="utf-8") as file:
-            json.dump(results, file, indent=4)
+        formatted_json = json.dumps(results, indent=4)
+        json_output_path.write_text(formatted_json, encoding="utf-8")

@@ -185,14 +185,12 @@ class FrequencyAnalyzer(Analyzer):
         self.stop_words = stop_words
         
     def analyze(self, context):
-        sorted_word_frequency = context.sorted_word_frequency # Use the renamed attribute
-        
-        show_words = min(5, len(sorted_word_frequency)) # Determine how many top words to display
+        sorted_word_frequency = context.sorted_word_frequency
         top_keywords = [(word, count) for word, count in sorted_word_frequency if word not in self.stop_words]
         
         return {
             "most_frequent_word": sorted_word_frequency[0],
-            "top_words": [(sorted_word_frequency[i][0], sorted_word_frequency[i][1]) for i in range(show_words)],
+            "top_words": sorted_word_frequency[:5],
             "top_keywords": top_keywords[:5]
         }
   

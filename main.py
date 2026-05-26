@@ -2,18 +2,18 @@ from text_analyzer import AnalyzerApp
 from ui import TextAnalysisReport
 from report_generator import ReportGenerator, ReportExporter
 from config import input_path, json_output_path, output_path
-import os, sys
+import sys
+from pathlib import Path
 
 # Initialize the main application logic for text analysis.
 app = AnalyzerApp()
 
 # Create or check if there is a folder to load inputs.
-os.makedirs("inputs", exist_ok=True)
+Path("inputs").mkdir(exist_ok=True)
 
 # Attempt to load text from the configured input file path.
 try:
-    with open(input_path, "r", encoding="utf-8") as file:
-        user_input = file.read()
+    user_input = input_path.read_text(encoding="utf-8")
 
 except FileNotFoundError:
     # Fallback to manual console input if the file is missing.

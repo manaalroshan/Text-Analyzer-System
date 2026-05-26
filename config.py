@@ -1,3 +1,4 @@
+from pathlib import Path
 stop_words = set([
         "a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
         "any", "are", "as", "at", "be", "because", "been", "before", "being", "below",
@@ -87,6 +88,6 @@ buffer_time = 1.10 # 10% buffer for breathing and emphasis.
 
 
 # File Paths
-input_path = "inputs/raw_text.txt"
-output_path = "results/text_analysis.txt"
-json_output_path = "results/analysis.json"
+input_path = Path("inputs") / "raw_text.txt"
+output_path = Path("results") / "text_analysis.txt"
+json_output_path = Path("results") / "analysis.json"
