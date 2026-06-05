@@ -165,7 +165,7 @@ class LexicalAnalyzer(Analyzer):
         
         vocabulary_comments = "N/A"
         if word_stats['word_count'] < 20:
-            vocabulary_comments= "Insufficient data for richness score"
+            vocabulary_comments= "Small text sample - interpret cautiously"
         else:
             for limit, remark in self.vocab_statements:
                 if vocab_score <= limit:
