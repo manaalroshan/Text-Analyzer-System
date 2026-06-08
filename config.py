@@ -70,7 +70,7 @@ abbreviations_list = set([
 "Spec.", "Misc.", "Add.", "Sub.", "Mult.", "Div.", "Avg.",
 "Max.", "Min.", "Tot.", "Cnt.", "Num.", "Val.", "Idx.",
 "Arr.", "Str.", "Obj.", "Cls.", "Pkg.", "Mod.", "Lib.",
-"Env.", "Cfg.", "Var.", "Const.", "Func.", "Arg.", "Ret."
+"Env.", "Cfg.", "Var.", "Const.", "Func.", "Arg.", "Ret.", "U.S.A."
 ])
 
 

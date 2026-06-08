@@ -1,4 +1,4 @@
-import string
+import string, re
 from config import stop_words, abbreviations_list, reading_wpm, speaking_wpm, buffer_time, vocab_statements
 from abc import ABC, abstractmethod
 
@@ -18,7 +18,8 @@ class TextCleaner:
     def remove_punctuation(text):
         """Removes punctuation from the text, preserving apostrophes and hyphens."""
         modified_punctuation = string.punctuation.replace("'", "").replace("-", "")
-        return text.translate(str.maketrans("","", modified_punctuation)).lower()
+        cleaned_text = text.translate(str.maketrans(modified_punctuation, " " * len(modified_punctuation))).lower()
+        return re.sub(r"\s+", " ", cleaned_text).strip()
     
     @staticmethod
     def split_text_into_words(text):
@@ -35,11 +36,12 @@ class TextCleaner:
     @staticmethod
     def get_sentence_wordcount(normalized_text):
         """Splits text into sentences and returns a list of word counts for each sentence."""
-        # Now will Calculate Min and Mix words sentences.
-        # First we gonna split the paragraph into sentences and store the numbers of words per sentence in a list.
-        text = normalized_text.replace("?", ".").replace("!", ".").split(".")
-        text = [i.strip() for i in text if i.strip()]
-        return [len(i.split()) for i in text]
+        sentences = re.split(r"(?<=[!.?])\s+(?=[A-Z0-9])", normalized_text)
+        return [len(sentence.split()) for sentence in sentences]
+    
+    @staticmethod
+    def sentence_count(splitted_sentences):
+        return len(splitted_sentences)
     
     @staticmethod
     def build_word_frequency(words):
@@ -57,48 +59,11 @@ class TextCleaner:
         return sorted_frequency_list
     
     @staticmethod
-    def sentence_count(normalized_abbreviations):
-        sentence_count = 0
-        punctuation_list = ["?", ".", "!"]
-        # Heuristic for sentence counting:
-        # 1. Initialize count to 1 if any alphanumeric character exists (assuming at least one sentence).
-        # 2. Increment count for patterns like "[.!?] + space + uppercase letter".
-    
-        valid_letter = any(i.isalnum() for i in normalized_abbreviations)
-        if valid_letter:
-            sentence_count = 1
-            
-        # Apply heuristic for sentence boundaries
-        for i in range(len(normalized_abbreviations)-2):
-            if normalized_abbreviations[i] in punctuation_list:
-                if normalized_abbreviations[i+1] == " " and normalized_abbreviations[i+2].isupper():
-                    sentence_count += 1
-        return sentence_count
-    
-    @staticmethod
     def paragraph_count(raw_text):
-        # Paragraphs are typically separated by blank lines (two consecutive newlines).
-        text = raw_text.strip().splitlines()
-        
-        # Logic to identify paragraphs based on blank lines.
-        # A paragraph is a sequence of non-empty lines.
-        # When a blank line is encountered, the current accumulated lines form a paragraph.
-        # to the paragraph list and then reset the current paragraph buffer.
-        # After processing all lines, if anything remains in the current buffer,
-        # we add it as the last paragraph.
-        paragraphs = []
-        current_paragraph = []
-        for line in text:
-            if line.strip():
-                current_paragraph.append(line)
-            else:
-                if current_paragraph:
-                    paragraphs.append(current_paragraph)
-                    current_paragraph = []
-        if current_paragraph:
-            paragraphs.append(current_paragraph)
-        return len(paragraphs)
- 
+        paragraph_pattern = r"\r?\n[\t\r ]*\n+"
+        paragraph_split = [paragraph.strip() for paragraph in re.split(paragraph_pattern, raw_text) if paragraph.strip()]
+        return len(paragraph_split)
+
 # AnalysisContext acts as a shared data store for all analyzers, holding raw text and preprocessed data.   
 class AnalysisContext:
     def __init__(self, text):
@@ -111,10 +76,10 @@ class AnalysisContext:
         self.sorted_word_frequency = TextCleaner.sort_word_frequency(self.word_frequency)
         # Text with abbreviations normalized for better sentence detection
         self.normalized_abbreviations = TextCleaner.normalize_abbreviations(text, abbreviations_list)
-        # Sentence count logic
-        self.sentence_count = TextCleaner.sentence_count(self.normalized_abbreviations)
         # List of word counts for each sentence
         self.sentence_wordcount = TextCleaner.get_sentence_wordcount(self.normalized_abbreviations)
+        # Sentence count logic
+        self.sentence_count = TextCleaner.sentence_count(self.sentence_wordcount)
         # Paragraph count logic
         self.paragraph_count = TextCleaner.paragraph_count(self.raw_text)
         # Stores Analyzer's results for context
