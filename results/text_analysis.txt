@@ -36,8 +36,8 @@ Top 5 Frequent Words:
 5. is              →  3 times
 
 Top 5 Keywords (Stopwords Excluded):
-1. artificial      →  3 times
-2. intelligence    →  3 times
-3. ai              →  2 times
-4. cars            →  2 times
-5. page            →  2 times
+1. artificial      →  3 times (2.4%)
+2. intelligence    →  3 times (2.4%)
+3. ai              →  2 times (1.6%)
+4. cars            →  2 times (1.6%)
+5. page            →  2 times (1.6%)

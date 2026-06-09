@@ -22,7 +22,7 @@ class ReportGenerator:
         # Format frequency statistics into aligned, readable strings.
         word, count = freq_data['most_frequent_word']
         show_top_words = "\n".join([f"{i+1}. {w:<15} → {c:>2} times" for i, (w, c) in enumerate(freq_data['top_words'])])
-        show_top_keywords = "\n".join([f"{i+1}. {w:<15} → {c:>2} times" for i, (w, c) in enumerate(freq_data['top_keywords'])])
+        show_top_keywords = "\n".join([f"{i+1}. {w:<15} → {c:>2} times ({d}%)" for i, (w, c, d) in enumerate(freq_data['top_keywords'])])
             
         # Construct the final string using an f-string for clarity and performance.
         return (

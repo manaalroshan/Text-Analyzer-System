@@ -68,8 +68,8 @@ class TextAnalysisReport:
         
         if freq_data['top_keywords']:
             print("\nTop 5 Keywords (Stop words Excluded):")
-            for index, (w, c) in enumerate(freq_data['top_keywords']):
-                print(f"{index+1}. {w:<15} → {c:>2} times")
+            for index, (w, c, d) in enumerate(freq_data['top_keywords']):
+                print(f"{index+1}. {w:<15} → {c:>2} times ({d}%)")
         
     # Prints the report footer.
     def print_footer(self):

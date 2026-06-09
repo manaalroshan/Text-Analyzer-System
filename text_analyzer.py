@@ -44,6 +44,12 @@ class TextCleaner:
         return len(splitted_sentences)
     
     @staticmethod
+    def keywords_extractor(text, stop_words):
+        extracted_words = re.findall(r"\d*[a-zA-Z]+\d*(?:[-'’][a-zA-Z0-9]+)*", text.lower())
+        final_result = [keyword for keyword in extracted_words if keyword not in stop_words]
+        return final_result
+    
+    @staticmethod
     def build_word_frequency(words):
         """Builds a dictionary mapping each word to its frequency."""
         word_frequency_dict = {}
@@ -69,7 +75,11 @@ class AnalysisContext:
     def __init__(self, text):
         self.raw_text = text
         # Preprocessed words (punctuation removed, lowercased)
-        self.words = TextCleaner.split_text_into_words(text)  
+        self.words = TextCleaner.split_text_into_words(text) 
+        # Keywords extraction and frequency calculation
+        self.keywords = TextCleaner.keywords_extractor(text, stop_words) 
+        self.keyword_frequency = TextCleaner.build_word_frequency(self.keywords)
+        self.sorted_keyword_frequency = TextCleaner.sort_word_frequency(self.keyword_frequency)
         # Frequency map of all words
         self.word_frequency = TextCleaner.build_word_frequency(self.words)
         # Sorted list of (word, count) tuples by frequency
@@ -146,13 +156,13 @@ class LexicalAnalyzer(Analyzer):
         
 # Analyzes word frequencies, identifying most frequent words and keywords (excluding stop words).
 class FrequencyAnalyzer(Analyzer):
-    def __init__(self, stop_words):
-        self.stop_words = stop_words
-        
     def analyze(self, context):
         sorted_word_frequency = context.sorted_word_frequency
-        top_keywords = [(word, count) for word, count in sorted_word_frequency if word not in self.stop_words]
-        
+        # Calculating Keyword Density
+        top_keywords = []
+        for keyword, count in context.sorted_keyword_frequency:
+            density = round((count / len(context.words)) * 100, 1)
+            top_keywords.append((keyword, count, density))
         return {
             "most_frequent_word": sorted_word_frequency[0],
             "top_words": sorted_word_frequency[:5],
@@ -202,7 +212,7 @@ class AnalyzerApp:
         self.engine.add_analyzer(WordAnalyzer())
         self.engine.add_analyzer(CharacterAnalyzer())
         self.engine.add_analyzer(LexicalAnalyzer(reading_wpm, speaking_wpm, buffer_time, vocab_statements))
-        self.engine.add_analyzer(FrequencyAnalyzer(stop_words))
+        self.engine.add_analyzer(FrequencyAnalyzer())
         self.engine.add_analyzer(SentenceAnalyzer())
         self.engine.add_analyzer(ParagraphAnalyzer())
         

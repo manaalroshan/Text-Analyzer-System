@@ -45,23 +45,28 @@
         "top_keywords": [
             [
                 "artificial",
-                3
+                3,
+                2.4
             ],
             [
                 "intelligence",
-                3
+                3,
+                2.4
             ],
             [
                 "ai",
-                2
+                2,
+                1.6
             ],
             [
                 "cars",
-                2
+                2,
+                1.6
             ],
             [
                 "page",
-                2
+                2,
+                1.6
             ]
         ]
     },
