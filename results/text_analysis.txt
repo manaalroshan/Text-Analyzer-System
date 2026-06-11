@@ -1,43 +1,56 @@
 Text Analysis Report
 -------------------------------------------------------------------------
 Word Based Stats:
-Total Words: 124
-Unique Words: 92
-Longest Word: 'recommendations' (15 letters long)
+Total Words: 123
+Unique Words: 97
+Longest Word: 'acmecorp-example' (16 letters long)
 -------------------------------------------------------------------------
 Character Stats:
-Total Characters (with spaces): 851
-Total Characters (without spaces): 727
+Total Characters (with spaces): 768
+Total Characters (without spaces): 660
 -------------------------------------------------------------------------
 Sentence Based Stats:
-Total Sentences: 7
-Longest Sentence: 22 Words
-Shortest Sentence: 13 Words
-Avg. Sentence Length: 17.7 Words
-Avg. Sentence Characters: 121.6 Characters
+Total Sentences: 8
+Longest Sentence: 32 Words
+Shortest Sentence: 2 Words
+Avg. Sentence Length: 15.4 Words
+Avg. Sentence Characters: 96.0 Characters
 -------------------------------------------------------------------------
 Paragraph Stats:
-Total Paragraphs: 2
-Avg. Sentences per Paragraph: 3.5
+Total Paragraphs: 6
+Avg. Sentences per Paragraph: 1.3
 -------------------------------------------------------------------------
 Lexical Stats:
-Estimated Reading Time: 29.8 Seconds
-Estimated Speaking Time: 51.2 Seconds
-Vocabulary Richness Score: 74.19% (Diverse vocabulary)
+Estimated Reading Time: 29.5 Seconds
+Estimated Speaking Time: 50.7 Seconds
+Vocabulary Richness Score: 78.86% (Diverse vocabulary)
 -------------------------------------------------------------------------
 Frequency Based Stats:
-Most Frequent Word: 'and' (9 times)
+Most Frequent Word: 'at' (4 times)
 
 Top 5 Frequent Words:
-1. and             →  9 times
-2. a               →  4 times
-3. artificial      →  3 times
-4. intelligence    →  3 times
-5. is              →  3 times
+1. at              →  4 times
+2. the             →  4 times
+3. 2026            →  3 times
+4. please          →  3 times
+5. com             →  3 times
 
 Top 5 Keywords (Stopwords Excluded):
-1. artificial      →  3 times (2.4%)
-2. intelligence    →  3 times (2.4%)
-3. ai              →  2 times (1.6%)
-4. cars            →  2 times (1.6%)
-5. page            →  2 times (1.6%)
+1. please          →  3 times (2.4%)
+2. com             →  3 times (2.4%)
+3. meeting         →  2 times (1.6%)
+4. september       →  2 times (1.6%)
+5. michael         →  2 times (1.6%)
+-------------------------------------------------------------------------
+Detected Patterns:
+Emails Found: 3
+michael.anderson@example.com | support@vendor-example.net | finance.team@example.org
+
+urls Found: 2
+https://www.acmecorp-example.com/projects/q3-review | https://docs.acmecorp-example.com/specifications/v2
+
+Phone Numbers Found: 3
++1 (415) 555-0187 | +44 20 7946 0958 | +91 98765 43210
+
+Dates Found: 3
+September 18, 2026 | August 29, 2026 | September 15, 2026

@@ -52,7 +52,7 @@ class TextAnalysisReport:
         print(f"Estimated Speaking Time: {lexical_data['speaking_time']:.1f} Seconds")
         print(f"Vocabulary Richness Score: {lexical_data['vocabulary_score']:.2f}% ({lexical_data['vocabulary_remarks']})")
         print(self.divider)
-        
+            
     # Prints frequency-based statistics like most frequent words and keywords.
     def print_frequency_stats(self, freq_data):
         if not freq_data: return
@@ -70,6 +70,22 @@ class TextAnalysisReport:
             print("\nTop 5 Keywords (Stop words Excluded):")
             for index, (w, c, d) in enumerate(freq_data['top_keywords']):
                 print(f"{index+1}. {w:<15} → {c:>2} times ({d}%)")
+        else:
+            print("\nNo keywords Found")
+        print(self.divider)
+        
+    # Prints Statistics related to Entities.
+    def print_entity_stats(self, entity_data):
+        if not entity_data: return
+        if not any(entity_data.values()):
+            print("Detected Patterns:")
+            print("No Supported patterns detected.\n")
+        else:
+            print("Detected Patterns:")
+            for key, value in entity_data.items():
+                if value:
+                    print(f"\n{key} Found: {len(value)}")
+                    print(f"{' | '.join(value)}")
         
     # Prints the report footer.
     def print_footer(self):
@@ -85,4 +101,5 @@ class TextAnalysisReport:
         self.print_paragraph_stats(results.get('ParagraphAnalyzer'))
         self.print_lexical_stats(results.get('LexicalAnalyzer'))
         self.print_frequency_stats(results.get('FrequencyAnalyzer'))
+        self.print_entity_stats(results.get('EntityAnalyzer'))
         self.print_footer()

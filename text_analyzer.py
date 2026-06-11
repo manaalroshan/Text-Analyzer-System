@@ -1,5 +1,6 @@
-import string, re
+import re
 from config import stop_words, abbreviations_list, reading_wpm, speaking_wpm, buffer_time, vocab_statements
+from config import date_pattern, email_pattern, url_pattern, phone_pattern
 from abc import ABC, abstractmethod
 
 # Abstract base class for all analyzers, defining the interface for analysis.
@@ -15,16 +16,9 @@ class Analyzer(ABC):
 # Helper class containing static methods for common text cleaning and preprocessing tasks.
 class TextCleaner:
     @staticmethod
-    def remove_punctuation(text):
-        """Removes punctuation from the text, preserving apostrophes and hyphens."""
-        modified_punctuation = string.punctuation.replace("'", "").replace("-", "")
-        cleaned_text = text.translate(str.maketrans(modified_punctuation, " " * len(modified_punctuation))).lower()
-        return re.sub(r"\s+", " ", cleaned_text).strip()
-    
-    @staticmethod
-    def split_text_into_words(text):
-        """Cleans text by removing punctuation and then splits it into a list of words."""
-        return TextCleaner.remove_punctuation(text).split()
+    def words_extractor(text):
+        clean_text = re.findall(r"[a-zA-Z0-9]+(?:[-'’—][a-zA-Z0-9]+)*", text.lower())
+        return clean_text
     
     @staticmethod
     def normalize_abbreviations(text, abbreviations_list):
@@ -45,7 +39,7 @@ class TextCleaner:
     
     @staticmethod
     def keywords_extractor(text, stop_words):
-        extracted_words = re.findall(r"\d*[a-zA-Z]+\d*(?:[-'’][a-zA-Z0-9]+)*", text.lower())
+        extracted_words = re.findall(r"\d*[a-zA-Z]+\d*(?:[-'’—][a-zA-Z0-9]+)*", text.lower())
         final_result = [keyword for keyword in extracted_words if keyword not in stop_words]
         return final_result
     
@@ -69,15 +63,33 @@ class TextCleaner:
         paragraph_pattern = r"\r?\n[\t\r ]*\n+"
         paragraph_split = [paragraph.strip() for paragraph in re.split(paragraph_pattern, raw_text) if paragraph.strip()]
         return len(paragraph_split)
+    
+    @staticmethod
+    def entity_extractor(text, date_pattern, email_pattern, url_pattern, phone_pattern):
+        email_list = re.findall(email_pattern, text, re.X)
+        clean_email = [email for email in email_list if ".." not in email]
 
+        url_list = re.findall(url_pattern, text, re.X)
+        clean_url = [url for url in url_list if "@" not in url and url not in clean_email]
+
+        raw_phone_numbers = re.findall(phone_pattern, text, re.X)
+        raw_dates = re.findall(date_pattern, text, re.X)
+        
+        return {
+            "emails": clean_email,
+            "urls": clean_url,
+            "phones": raw_phone_numbers,
+            "dates": raw_dates
+        }
+    
 # AnalysisContext acts as a shared data store for all analyzers, holding raw text and preprocessed data.   
 class AnalysisContext:
     def __init__(self, text):
         self.raw_text = text
         # Preprocessed words (punctuation removed, lowercased)
-        self.words = TextCleaner.split_text_into_words(text) 
+        self.words = TextCleaner.words_extractor(self.raw_text) 
         # Keywords extraction and frequency calculation
-        self.keywords = TextCleaner.keywords_extractor(text, stop_words) 
+        self.keywords = TextCleaner.keywords_extractor(self.raw_text, stop_words) 
         self.keyword_frequency = TextCleaner.build_word_frequency(self.keywords)
         self.sorted_keyword_frequency = TextCleaner.sort_word_frequency(self.keyword_frequency)
         # Frequency map of all words
@@ -92,6 +104,8 @@ class AnalysisContext:
         self.sentence_count = TextCleaner.sentence_count(self.sentence_wordcount)
         # Paragraph count logic
         self.paragraph_count = TextCleaner.paragraph_count(self.raw_text)
+        # Entity Logic
+        self.entities = TextCleaner.entity_extractor(self.raw_text, date_pattern, email_pattern, url_pattern, phone_pattern)
         # Stores Analyzer's results for context
         self.results = {}
   
@@ -187,6 +201,17 @@ class ParagraphAnalyzer(Analyzer):
             "paragraph_count": context.paragraph_count,
             "avg_sentence_para": context.sentence_count / context.paragraph_count if context.paragraph_count > 0 else 0,
         }  
+        
+# Entity Analyzer
+class EntityAnalyzer(Analyzer):
+    def analyze(self, context):
+        entities = context.entities
+        return {
+            'Emails': entities['emails'],
+            'Urls': entities['urls'],
+            'Phone Numbers': entities['phones'],
+            'Dates': entities['dates'] 
+        }          
 
 # AnalyzerEngine orchestrates the execution of multiple Analyzer instances.
 class AnalyzerEngine:
@@ -215,6 +240,7 @@ class AnalyzerApp:
         self.engine.add_analyzer(FrequencyAnalyzer())
         self.engine.add_analyzer(SentenceAnalyzer())
         self.engine.add_analyzer(ParagraphAnalyzer())
+        self.engine.add_analyzer(EntityAnalyzer())
         
     def analyze(self, text):
         """Initiates the analysis process and handles potential errors."""

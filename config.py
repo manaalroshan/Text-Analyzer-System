@@ -91,3 +91,39 @@ buffer_time = 1.10 # 10% buffer for breathing and emphasis.
 input_path = Path("inputs") / "raw_text.txt"
 output_path = Path("results") / "text_analysis.txt"
 json_output_path = Path("results") / "analysis.json"
+
+
+# Regex Patterns
+email_pattern = r"""\b[a-zA-Z0-9_]
+    [a-zA-Z0-9._+%-]*
+    @
+    [a-zA-Z0-9][a-zA-Z0-9.-]+
+    \.
+    [a-zA-Z]{2,}\b
+"""
+
+
+url_pattern = r"""
+    \b(?:https?://)?
+    [^\s<>\"\^\{\}|`]+
+    \.
+    [a-zA-Z]{2,}
+    [^\s<>\"\^\{\}|`]*
+    [a-zA-Z0-9/%\?\-=+_]
+"""
+
+date_pattern = r'''
+    \b \d{2} \s [a-zA-Z]{3,9} , \s \d{4} \b| 
+    \b [a-zA-Z]{3,9} \s \d{2} , \s \d{4} \b|
+    (?<!\d) \d{4} - \d{2} - \d{2} (?!\d)  | 
+    (?<!\d) \d{2} - \d{2} - \d{4} (?!\d)  |
+    (?<!\d) \d{2} / \d{2} / \d{4} (?!\d)  |
+    (?<!\d) \d{4} / \d{2} / \d{2} (?!\d)
+'''
+
+
+phone_pattern = r'''
+    \+? \b \d{1,3} \s? \d{10,15} \b|
+    \+? \b (?:[\d]{1,3}\s)? \(? \d{2,3} \)? \s? -? \d{3,4} \s? -? \d{3,4} \b|
+    \+? \b \d{1,3} \s? \d{3,5} \s \d{5,8} \b
+'''

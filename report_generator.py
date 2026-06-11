@@ -15,8 +15,9 @@ class ReportGenerator:
         para_data = results.get('ParagraphAnalyzer')
         lexical_data = results.get('LexicalAnalyzer')
         freq_data = results.get('FrequencyAnalyzer')
+        entity_data = results.get('EntityAnalyzer')
 
-        if not all([word_data, char_data, sentence_data, para_data, lexical_data, freq_data]):
+        if not all([word_data, char_data, sentence_data, para_data, lexical_data, freq_data, entity_data]):
             return
      
         # Format frequency statistics into aligned, readable strings.
@@ -24,6 +25,32 @@ class ReportGenerator:
         show_top_words = "\n".join([f"{i+1}. {w:<15} → {c:>2} times" for i, (w, c) in enumerate(freq_data['top_words'])])
         show_top_keywords = "\n".join([f"{i+1}. {w:<15} → {c:>2} times ({d}%)" for i, (w, c, d) in enumerate(freq_data['top_keywords'])])
             
+        # Format Entity Statistics into aligned, readable stringd.
+        Emails = entity_data['Emails']
+        Urls = entity_data['Urls']
+        Phones = entity_data['Phone Numbers']
+        Dates = entity_data['Dates']
+        
+        pattern = ""
+        if not any(entity_data.values()):
+            pattern = f"No Supported patterns detected.\n"
+            
+        email_pattern = ""
+        if Emails:
+            email_pattern = f"Emails Found: {len(Emails)}\n{' | '.join(Emails)}\n\n"
+            
+        url_pattern = ""
+        if Urls:
+            url_pattern =  f"urls Found: {len(Urls)}\n{' | '.join(Urls)}\n\n"
+            
+        phones_pattern = ""
+        if Phones:
+            phones_pattern = f"Phone Numbers Found: {len(Phones)}\n{' | '.join(Phones)}\n\n"
+            
+        date_pattern = ""
+        if Dates:
+            date_pattern = f"Dates Found: {len(Dates)}\n{' | '.join(Dates)}"
+        
         # Construct the final string using an f-string for clarity and performance.
         return (
                 "Text Analysis Report\n"
@@ -58,7 +85,14 @@ class ReportGenerator:
                 "\nTop 5 Frequent Words:\n"
                 f"{show_top_words}\n"
                 "\nTop 5 Keywords (Stopwords Excluded):\n"
-                f"{show_top_keywords}"   
+                f"{show_top_keywords}\n"
+                "-------------------------------------------------------------------------\n" 
+                "Detected Patterns:\n"
+                f"{pattern}"
+                f"{email_pattern}"
+                f"{url_pattern}"
+                f"{phones_pattern}"
+                f"{date_pattern}"        
             )
     
     def build_report(self, results):

@@ -1,84 +1,105 @@
 {
     "WordAnalyzer": {
-        "word_count": 124,
-        "unique_word_count": 92,
-        "longest_word": "recommendations",
-        "length_longest_word": 15
+        "word_count": 123,
+        "unique_word_count": 97,
+        "longest_word": "acmecorp-example",
+        "length_longest_word": 16
     },
     "CharacterAnalyzer": {
-        "char_count_with_spaces": 851,
-        "char_count_without_spaces": 727
+        "char_count_with_spaces": 768,
+        "char_count_without_spaces": 660
     },
     "LexicalAnalyzer": {
-        "reading_time": 29.759999999999998,
-        "speaking_time": 51.150000000000006,
-        "vocabulary_score": 74.19354838709677,
+        "reading_time": 29.52,
+        "speaking_time": 50.737500000000004,
+        "vocabulary_score": 78.86178861788618,
         "vocabulary_remarks": "Diverse vocabulary"
     },
     "FrequencyAnalyzer": {
         "most_frequent_word": [
-            "and",
-            9
+            "at",
+            4
         ],
         "top_words": [
             [
-                "and",
-                9
-            ],
-            [
-                "a",
+                "at",
                 4
             ],
             [
-                "artificial",
+                "the",
+                4
+            ],
+            [
+                "2026",
                 3
             ],
             [
-                "intelligence",
+                "please",
                 3
             ],
             [
-                "is",
+                "com",
                 3
             ]
         ],
         "top_keywords": [
             [
-                "artificial",
+                "please",
                 3,
                 2.4
             ],
             [
-                "intelligence",
+                "com",
                 3,
                 2.4
             ],
             [
-                "ai",
+                "meeting",
                 2,
                 1.6
             ],
             [
-                "cars",
+                "september",
                 2,
                 1.6
             ],
             [
-                "page",
+                "michael",
                 2,
                 1.6
             ]
         ]
     },
     "SentenceAnalyzer": {
-        "sentence_count": 7,
-        "max_words_sentence": 22,
-        "min_words_sentence": 13,
-        "avg_chars_sentence": 121.57142857142857,
-        "avg_words_sentence": 17.714285714285715
+        "sentence_count": 8,
+        "max_words_sentence": 32,
+        "min_words_sentence": 2,
+        "avg_chars_sentence": 96.0,
+        "avg_words_sentence": 15.375
     },
     "ParagraphAnalyzer": {
-        "paragraph_count": 2,
-        "avg_sentence_para": 3.5
+        "paragraph_count": 6,
+        "avg_sentence_para": 1.3333333333333333
+    },
+    "EntityAnalyzer": {
+        "Emails": [
+            "michael.anderson@example.com",
+            "support@vendor-example.net",
+            "finance.team@example.org"
+        ],
+        "Urls": [
+            "https://www.acmecorp-example.com/projects/q3-review",
+            "https://docs.acmecorp-example.com/specifications/v2"
+        ],
+        "Phone Numbers": [
+            "+1 (415) 555-0187",
+            "+44 20 7946 0958",
+            "+91 98765 43210"
+        ],
+        "Dates": [
+            "September 18, 2026",
+            "August 29, 2026",
+            "September 15, 2026"
+        ]
     }
 }
