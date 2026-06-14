@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 *.test.py
+.venv/
+.vscode/
+.pytest_cache/
