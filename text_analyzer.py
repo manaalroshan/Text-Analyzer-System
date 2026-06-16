@@ -23,8 +23,9 @@ class TextCleaner:
     @staticmethod
     def normalize_abbreviations(text, abbreviations_list):
         """Removes periods from recognized abbreviations to prevent false sentence breaks."""
+        abbreviations = {abbr.casefold() for abbr in abbreviations_list}
         words_list = text.strip().split()
-        new_word_list = [word.replace(".", "") if word in abbreviations_list else word for word in words_list]
+        new_word_list = [word.replace(".", "") if word.casefold() in abbreviations else word for word in words_list]
         return " ".join(new_word_list)
     
     @staticmethod
@@ -32,10 +33,6 @@ class TextCleaner:
         """Splits text into sentences and returns a list of word counts for each sentence."""
         sentences = re.split(r"(?<=[!.?])\s+(?=[A-Z0-9])", normalized_text)
         return [len(sentence.split()) for sentence in sentences]
-    
-    @staticmethod
-    def sentence_count(splitted_sentences):
-        return len(splitted_sentences)
     
     @staticmethod
     def keywords_extractor(text, stop_words):
@@ -52,7 +49,7 @@ class TextCleaner:
         return word_frequency_dict
         
     @staticmethod
-    def sort_word_frequency(freq_dict): # Renamed for clarity
+    def sort_word_frequency(freq_dict): 
         """Sorts a word frequency dictionary into a list of (word, count) tuples in descending order."""
         sorted_frequency_list = list(freq_dict.items())
         sorted_frequency_list.sort(reverse=True, key=lambda x:x[1])
@@ -65,23 +62,27 @@ class TextCleaner:
         return len(paragraph_split)
     
     @staticmethod
-    def entity_extractor(text, date_pattern, email_pattern, url_pattern, phone_pattern):
+    def email_extractor(text, email_pattern):
         email_list = re.findall(email_pattern, text, re.X)
         clean_email = [email for email in email_list if ".." not in email]
-
-        url_list = re.findall(url_pattern, text, re.X)
-        clean_url = [url for url in url_list if "@" not in url and url not in clean_email]
-
-        raw_phone_numbers = re.findall(phone_pattern, text, re.X)
-        raw_dates = re.findall(date_pattern, text, re.X)
-        
-        return {
-            "emails": clean_email,
-            "urls": clean_url,
-            "phones": raw_phone_numbers,
-            "dates": raw_dates
-        }
+        return clean_email
     
+    @staticmethod
+    def url_extractor(text, url_pattern, email_list):
+        url_list = re.findall(url_pattern, text, re.X)
+        clean_url = [url for url in url_list if url not in email_list]
+        return clean_url
+    
+    @staticmethod
+    def phone_extractor(text, phone_pattern):
+        raw_phone_numbers = re.findall(phone_pattern, text, re.X)
+        return raw_phone_numbers
+    
+    @staticmethod
+    def date_extractor(text, date_pattern):
+        raw_dates = re.findall(date_pattern, text, re.X)
+        return raw_dates
+          
 # AnalysisContext acts as a shared data store for all analyzers, holding raw text and preprocessed data.   
 class AnalysisContext:
     def __init__(self, text):
@@ -100,12 +101,13 @@ class AnalysisContext:
         self.normalized_abbreviations = TextCleaner.normalize_abbreviations(text, abbreviations_list)
         # List of word counts for each sentence
         self.sentence_wordcount = TextCleaner.get_sentence_wordcount(self.normalized_abbreviations)
-        # Sentence count logic
-        self.sentence_count = TextCleaner.sentence_count(self.sentence_wordcount)
         # Paragraph count logic
         self.paragraph_count = TextCleaner.paragraph_count(self.raw_text)
         # Entity Logic
-        self.entities = TextCleaner.entity_extractor(self.raw_text, date_pattern, email_pattern, url_pattern, phone_pattern)
+        self.email = TextCleaner.email_extractor(self.raw_text, email_pattern)
+        self.url = TextCleaner.url_extractor(self.raw_text, url_pattern, self.email)
+        self.phone = TextCleaner.phone_extractor(self.raw_text, phone_pattern)
+        self.date = TextCleaner.date_extractor(self.raw_text, date_pattern)
         # Stores Analyzer's results for context
         self.results = {}
   
@@ -185,13 +187,14 @@ class FrequencyAnalyzer(Analyzer):
   
 # Analyzes sentence-based statistics, including total sentences, and min/max/average word/character counts per sentence.
 class SentenceAnalyzer(Analyzer):
-    def analyze(self, context):                    
+    def analyze(self, context):
+        sentence_count = len(context.sentence_wordcount)                   
         return {
-            "sentence_count": context.sentence_count,
+            "sentence_count": sentence_count,
             "max_words_sentence": max(context.sentence_wordcount, default=0),
             "min_words_sentence": min(context.sentence_wordcount, default=0),
-            "avg_chars_sentence": len(context.raw_text) / context.sentence_count if context.sentence_count > 0 else 0,
-            "avg_words_sentence": len(context.words) / context.sentence_count if context.sentence_count > 0 else 0,
+            "avg_chars_sentence": len(context.raw_text) / sentence_count if sentence_count > 0 else 0,
+            "avg_words_sentence": len(context.words) / sentence_count if sentence_count > 0 else 0,
         }
     
 # Analyzes paragraph-based statistics, counting paragraphs and average sentences per paragraph.
@@ -199,18 +202,21 @@ class ParagraphAnalyzer(Analyzer):
     def analyze(self, context):
         return {
             "paragraph_count": context.paragraph_count,
-            "avg_sentence_para": context.sentence_count / context.paragraph_count if context.paragraph_count > 0 else 0,
+            "avg_sentence_para": len(context.sentence_wordcount) / context.paragraph_count if context.paragraph_count > 0 else 0,
         }  
         
 # Entity Analyzer
 class EntityAnalyzer(Analyzer):
     def analyze(self, context):
-        entities = context.entities
+        emails = context.email
+        urls = context.url
+        phones = context.phone
+        dates = context.date
         return {
-            'Emails': entities['emails'],
-            'Urls': entities['urls'],
-            'Phone Numbers': entities['phones'],
-            'Dates': entities['dates'] 
+            'Emails': emails,
+            'Urls': urls,
+            'Phone Numbers': phones,
+            'Dates': dates,
         }          
 
 # AnalyzerEngine orchestrates the execution of multiple Analyzer instances.

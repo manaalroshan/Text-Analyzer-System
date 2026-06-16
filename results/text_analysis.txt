@@ -46,8 +46,8 @@ Detected Patterns:
 Emails Found: 3
 michael.anderson@example.com | support@vendor-example.net | finance.team@example.org
 
-urls Found: 2
-https://www.acmecorp-example.com/projects/q3-review | https://docs.acmecorp-example.com/specifications/v2
+urls Found: 3
+https://www.acmecorp-example.com/projects/q3-review | https://docs.acmecorp-example.com/specifications/v2 | vendor-example.net
 
 Phone Numbers Found: 3
 +1 (415) 555-0187 | +44 20 7946 0958 | +91 98765 43210

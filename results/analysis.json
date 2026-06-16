@@ -89,7 +89,8 @@
         ],
         "Urls": [
             "https://www.acmecorp-example.com/projects/q3-review",
-            "https://docs.acmecorp-example.com/specifications/v2"
+            "https://docs.acmecorp-example.com/specifications/v2",
+            "vendor-example.net"
         ],
         "Phone Numbers": [
             "+1 (415) 555-0187",
