@@ -68,10 +68,10 @@ class TextCleaner:
         return clean_email
     
     @staticmethod
-    def url_extractor(text, url_pattern, email_list):
-        url_list = re.findall(url_pattern, text, re.X)
-        clean_url = [url for url in url_list if url not in email_list]
-        return clean_url
+    def url_extractor(text, url_pattern, email_pattern):
+        clean_text = re.sub(email_pattern, "", text, flags=re.X)
+        urls = re.findall(url_pattern, clean_text, re.X)
+        return urls
     
     @staticmethod
     def phone_extractor(text, phone_pattern):
@@ -105,7 +105,7 @@ class AnalysisContext:
         self.paragraph_count = TextCleaner.paragraph_count(self.raw_text)
         # Entity Logic
         self.email = TextCleaner.email_extractor(self.raw_text, email_pattern)
-        self.url = TextCleaner.url_extractor(self.raw_text, url_pattern, self.email)
+        self.url = TextCleaner.url_extractor(self.raw_text, url_pattern, email_pattern)
         self.phone = TextCleaner.phone_extractor(self.raw_text, phone_pattern)
         self.date = TextCleaner.date_extractor(self.raw_text, date_pattern)
         # Stores Analyzer's results for context
@@ -180,7 +180,7 @@ class FrequencyAnalyzer(Analyzer):
             density = round((count / len(context.words)) * 100, 1)
             top_keywords.append((keyword, count, density))
         return {
-            "most_frequent_word": sorted_word_frequency[0],
+            "most_frequent_word": sorted_word_frequency[0] if sorted_word_frequency else None,
             "top_words": sorted_word_frequency[:5],
             "top_keywords": top_keywords[:5]
         }

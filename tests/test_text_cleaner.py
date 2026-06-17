@@ -1,6 +1,6 @@
 import pytest
 from text_analyzer import TextCleaner
-from config import abbreviations_list
+from config import abbreviations_list, email_pattern, url_pattern, date_pattern, phone_pattern
 
 # Tests for words_extractor function.    
 @pytest.mark.parametrize("text, expected", [
@@ -110,3 +110,105 @@ def test_sort_word_frequency(text, expected):
 def test_keywords_extractor(text, stop_words, expected):
     assert TextCleaner.keywords_extractor(text, stop_words) == expected
     
+# Tests for Email Extractor function.
+@pytest.mark.parametrize("text, expected", [
+    ("Contact me at john.doe@example.com", ["john.doe@example.com"]),
+    ("Emails: alice@test.com and bob.smith@company.org", ["alice@test.com", "bob.smith@company.org"]),
+    ("Send to user+tag@mail.example.co.uk", ["user+tag@mail.example.co.uk"]),
+    ("There is no email here", []),
+    ("john..doe@example.com john@exam..ple.com", []),
+    ("Valid: jane@test.com Invalid: bad..email@test.com", ["jane@test.com"]),
+    ("user_name@example.com user@my-domain.com", ["user_name@example.com", "user@my-domain.com"]),
+    ("abc123@test123.com", ["abc123@test123.com"]),
+    ("user@example.c", []),
+    ("Email me at test@example.com.", ["test@example.com"]),
+    ("USER.NAME@EXAMPLE.COM", ["USER.NAME@EXAMPLE.COM"]),
+])
+def test_email_extractor(text, expected):
+    assert TextCleaner.email_extractor(text, email_pattern) == expected
+
+# Test for URL Extractor function.
+@pytest.mark.parametrize("text, expected", [
+    # Simple URL
+    ("Visit https://example.com", ["https://example.com"]),
+    # URL without protocol
+    ("Visit example.com", ["example.com"]),
+    # Multiple URLs
+    ("Check example.com and https://google.com", ["example.com", "https://google.com"]),
+    # Subdomain
+    ("Go to docs.python.org", ["docs.python.org"]),
+    # Path
+    ("https://example.com/path/to/page", ["https://example.com/path/to/page"]),
+    # Query string
+    ("https://example.com/search?q=test&page=1 example.com/search?q=test", ["https://example.com/search?q=test&page=1", "example.com/search?q=test"]),
+    # No URLs
+    ("Just some plain text", []),
+    # Email should be filtered out
+    ("Email me at test@example.com", []),
+     # Mixed URL and email
+    ("Email test..@example.com and visit example.com", ["example.com"]),
+    # Multiple emails and URLs
+    ("a@test.com b@test.org example.com github.com", ["example.com", "github.com"]),
+    # URL with hyphens
+    ("https://my-site.example.com", ["https://my-site.example.com"]),
+    # URL with trailing slash
+    ("https://example.com/", ["https://example.com/"]),
+    # URL surrounded by punctuation
+    ("Visit (https://example.com) today", ["https://example.com"]),
+     # TLD too short
+    ("example.c", []),
+])
+def test_url_extractor(text, expected):
+    assert TextCleaner.url_extractor(text, url_pattern, email_pattern) == expected
+
+# Tests for Phone number extractor function.
+@pytest.mark.parametrize("text, expected", [
+    # Plain international format
+    ("Call me at 911234567890", ["911234567890"]),
+    # Leading plus
+    ("Call me at +911234567890", ["+911234567890"]),
+     # Country code + local number
+    ("Phone: +91 1234567890", ["+91 1234567890"]),
+    # US-style with parentheses
+    ("Office: +1 (555) 123-4567", ["+1 (555) 123-4567"]),
+    # Without plus
+    ("Office: 1 (555) 123-4567", ["1 (555) 123-4567"]),
+    # Spaces instead of hyphens
+    ("Office: 1 555 123 4567", ["1 555 123 4567"]),
+    # Alternative pattern
+    ("Reach me at 91 12345 67890", ["91 12345 67890"]),
+    # Multiple numbers
+    ("Numbers: +91 1234567890 and +1 (555) 123-4567", ["+91 1234567890", "+1 (555) 123-4567"]),
+    # No phone numbers
+    ("There are no phone numbers here", []),
+    # Too short
+    ("12345", []),
+    # Random digits that shouldn't match
+    ("ID 123456 and zip 90210", []),
+    # Embedded in text
+    ("Contact:+91 1234567890 immediately", ["+91 1234567890"]),
+])
+def test_phone_number_extractor(text, expected):
+    assert TextCleaner.phone_extractor(text, phone_pattern) == expected
+
+# Tests for Date extractor function.  
+@pytest.mark.parametrize("text, expected", [
+    ("Meeting on 25 December, 2024", ["25 December, 2024"]),
+    ("Meeting on December 25, 2024", ["December 25, 2024"]),
+    ("Date: 2024-12-25", ["2024-12-25"]),
+    ("Date: 25-12-2024", ["25-12-2024"]),
+    ("Date: 25/12/2024", ["25/12/2024"]),
+    ("Date: 2024/12/25", ["2024/12/25"]),
+    ("Start 2024-12-25 End 2025-01-01", ["2024-12-25", "2025-01-01"]),
+    ("25 December, 2024 and December 26, 2024", ["25 December, 2024", "December 26, 2024"]),
+    ("No dates here", []),
+    ("20241225", []),
+    ("25-12-24", []),
+    ("25/12/24", []),
+    ("2024/12", []),
+    ("2024-12-25abc", ["2024-12-25"]),
+    ("abc2024-12-25", ["2024-12-25"]),
+    ("2024-12-25, 25/12/2024, December 25, 2024", ["2024-12-25", "25/12/2024", "December 25, 2024"]),
+])
+def test_dates_extractor(text, expected):
+    assert TextCleaner.date_extractor(text, date_pattern) == expected
