@@ -46,10 +46,7 @@ def test_lexical_analyzer_requires_word_analyzer():
     context.words = ["hello", "world"]
 
     analyzer = LexicalAnalyzer(reading_wpm, speaking_wpm, buffer_time, vocab_statements)
-    with pytest.raises(
-        RuntimeError,
-        match="LexicalAnalyzer requires WordAnalyzer to run first."
-    ):
+    with pytest.raises(RuntimeError, match="LexicalAnalyzer requires WordAnalyzer to run first."):
         analyzer.analyze(context)
     
     

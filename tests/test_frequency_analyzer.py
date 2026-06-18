@@ -1,4 +1,3 @@
-import pytest
 from config import stop_words
 from text_analyzer import AnalysisContext, FrequencyAnalyzer
 from text_analyzer import TextCleaner

@@ -1,5 +1,5 @@
 import pytest
-from text_analyzer import WordAnalyzer
+from text_analyzer import WordAnalyzer, TextCleaner
 from text_analyzer import AnalysisContext
     
 @pytest.mark.parametrize("words, word_count, unique_word_count, longest_word", [
@@ -28,3 +28,12 @@ def test_word_analyzer_if_no_valid_words():
     analyzer = WordAnalyzer()
     with pytest.raises(ValueError):
         analyzer.analyze(context)
+        
+def test_wordanalyzer_whole_pipeline():
+    context = AnalysisContext("Dummy")
+    context.words = TextCleaner.words_extractor("This  is, a test     for wordanalyzer. This should correctly identify words!")
+    analyzer = WordAnalyzer()
+    result = analyzer.analyze(context)
+    assert result['word_count'] == 11
+    assert result['unique_word_count'] == 10
+    assert result['longest_word'] == "wordanalyzer"
