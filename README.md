@@ -1,18 +1,24 @@
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge&logo=opensourceinitiative&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python\&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-155-success)
+![Coverage](https://img.shields.io/badge/Coverage-99%25-brightgreen)
+![CI](https://img.shields.io/badge/GitHub_Actions-Passing-success?logo=githubactions)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 # 🧠 Text Analyzer System
-A modular Python-based text analysis system built using layered architecture and object-oriented design principles. The project analyzes raw text, extracts structured insights, and generates both human-readable reports and machine-readable JSON output through an extensible analysis pipeline.
+A modular Python-based text analysis system built using object-oriented design, layered architecture, and automated testing practices. 
+The application processes raw text through an extensible analyzer pipeline, extracts structured insights, and generates both human-readable reports and machine-readable JSON output.
+
+The project evolved from a simple text analysis script into a fully tested software system featuring reusable analyzers, shared execution contexts, report generation, automated regression testing, and GitHub Actions continuous integration.
 
 ---
 
 ## 🎯 About This Project
 
-This project began as a simple text analysis script and gradually evolved into a structured software system through **continuous refactoring** and **architectural improvements**.
+This project began as a simple text analysis script and gradually evolved into a structured software system through **continuous refactoring**, **architectural improvements**, and **iterative feature development**.
 
-The system now follows a modular architecture built around reusable analyzers, a shared execution context, dedicated presentation and reporting layers, and a persistence layer for exporting analysis results.
+The system is built around a modular analyzer pipeline, shared execution context, dedicated reporting layer, and export mechanisms for generating both human-readable reports and structured JSON output.
 
-More importantly, the project serves as an ongoing engineering playground where new concepts are applied through real implementation rather than isolated exercises.
+Beyond text analysis, the project serves as a practical learning platform for applying software engineering concepts such as object-oriented programming, layered architecture, testing, continuous integration, configuration management, and maintainable code design through real-world implementation.
 
 ---
 
@@ -27,130 +33,75 @@ More importantly, the project serves as an ongoing engineering playground where 
 
 ### 📈 Lexical Insights
 * Vocabulary richness scoring (Type-Token Ratio)
-* Vocabulary quality remarks
+* Vocabulary quality assessment
 * Estimated reading time
 * Estimated speaking time
 
-### 🔍 Frequency Analysis
-* Most frequent word detection
-* Top 5 frequent words
-* Top 5 keywords (excluding stopwords)
+### 🏷️ Entity Extraction
+* Email address extraction
+* URL extraction
+* Date extraction
+* Phone number extraction
 
-### 💾 Persistence & Export
-* File-based text input
-* Formatted report export (.txt)
+### 💾 Reporting & Export
+* Human-readable text report generation
 * Structured JSON export
-* UTF-8 encoding support
+* UTF-8 encoded output support
+
+### 🧪 Quality Assurance
+* 155 automated tests
+* 99% code coverage
+* Unit and integration testing
+* GitHub Actions continuous integration
+* Automated validation on every push and pull request
 
 ---
 
 ## 🏗️ Architecture
 
-The system follows a layered pipeline architecture where text flows through multiple stages of processing, analysis, presentation, and persistence.
-```
-                 Input Text
-                      │
-                      ▼
-             ┌─────────────────┐
-             │ AnalysisContext │
-             └─────────────────┘
-                      │
-                      ▼
-             ┌─────────────────┐
-             │ AnalyzerEngine  │
-             └─────────────────┘
-                      │
-                      ▼
-┌───────────────────────────────────────────────┐
-│               Analyzer Pipeline               │
-├───────────────────────────────────────────────┤
-│ Word │ Character │ Lexical │ Frequency │      │
-│ Sentence │ Paragraph │                        │
-└───────────────────────────────────────────────┘
-                      │
-                      ▼
-             ┌─────────────────┐
-             │ Analysis Results│
-             └─────────────────┘
-                      │
-          ┌───────────┴───────────┐
-          ▼                       ▼
- ┌─────────────────┐    ┌─────────────────┐
- │ Console Display │    │ Report Generator│
- └─────────────────┘    └─────────────────┘
-                                  │
-                                  ▼
-                        ┌─────────────────┐
-                        │ Report Exporter │
-                        └─────────────────┘
-                                  │
-                     ┌────────────┴────────────┐
-                     ▼                         ▼
-                TXT Report               JSON Export
-```
+The Text Analyzer System follows a modular, layered architecture centered around a shared execution context and an extensible analyzer pipeline. Each component has a single responsibility, making the system easier to test, maintain, and extend.
 
-### Key Components
-#### AnalysisContext
-
-Acts as a shared execution context for the entire analysis pipeline. Preprocessed data such as cleaned words, sentence statistics, paragraph counts, and frequency maps are computed once and shared across analyzers to avoid redundant work.
-
-#### AnalyzerEngine
-
-Responsible for orchestrating the analysis pipeline. Each analyzer is executed sequentially and its results are stored within the shared context.
-
-#### Modular Analyzers
-
-Each analyzer focuses on a single responsibility:
-
-- WordAnalyzer
-- CharacterAnalyzer
-- LexicalAnalyzer
-- FrequencyAnalyzer
-- SentenceAnalyzer
-- ParagraphAnalyzer
-
-This design keeps the system modular and makes it easy to add new analyzers in the future.
-
-#### Report Layer
-
-The reporting system is separated into two responsibilities:
-
-- ReportGenerator → Creates formatted human-readable reports.
-
-- ReportExporter → Handles persistence and export operations.
-
-This separation improves maintainability and keeps formatting logic independent from file operations.
+![Architecture Diagram](assets/Architecture.png)
 
 ---
 
 ## 📂 Project Structure
 
-```bash
+```text
 Text-Analyzer-System/
 │
-├── main.py
-│   └── Application entry point and orchestration
+├── .github/
+│   └── workflows/
+│       └── python-tests.yml
 │
-├── text_analyzer.py
-│   └── Core analysis engine, analyzers, context, and pipeline logic
+├── assets/
+│   ├── architecture.png
+│   └── sample_report.png
 │
-├── ui.py
-│   └── Console presentation and report visualization
-│
-├── report_generator.py
-│   ├── ReportGenerator (report construction)
-│   └── ReportExporter (TXT & JSON export)
-│
-├── config.py
-│   └── Application configuration, stopwords, abbreviations, and file paths
+├── tests/
+│   ├── test_app.py
+│   ├── test_character_analyzer.py
+│   ├── test_entity_analyzer.py
+│   ├── test_frequency_analyzer.py
+│   ├── test_lexical_analyzer.py
+│   ├── test_paragraph_analyzer.py
+│   ├── test_sentence_analyzer.py
+│   ├── test_text_cleaner.py
+│   └── test_word_analyzer.py
 │
 ├── inputs/
 │   └── raw_text.txt
 │
 ├── results/
-│   ├── text_analysis.txt
-│   └── analysis.json
+│   ├── analysis.json
+│   └── text_analysis.txt
 │
+├── config.py
+├── main.py
+├── text_analyzer.py
+├── report_generator.py
+├── ui.py
+├── requirements.txt
 ├── README.md
 ├── LICENSE
 └── .gitignore
@@ -158,151 +109,155 @@ Text-Analyzer-System/
 
 ---
 
-## 🔧 Technologies & Concepts Used
-
-### Technologies
-
-* Python 3
-* JSON
-* Pathlib
-* Git & GitHub
-
-### Core Concepts
-
-* Object-Oriented Programming (OOP)
-* Abstraction & Polymorphism
-* Layered Architecture
-* Separation of Concerns
-* Modular Design
-* Shared Execution Context
-* Refactoring
-
-### File Handling & Persistence
-
-* Text File Processing
-* JSON Serialization
-* UTF-8 Encoding
-* Filesystem Path Management
-
----
-
-## 🛠️ How to Run
-
+## ⚙️ Installation
 Clone the repository:
+
 ```bash
 git clone https://github.com/manaalroshan/Text-Analyzer-System.git
-
 cd Text-Analyzer-System
 ```
 
-Add the text you want to analyze to:
-```
-inputs/raw_text.txt
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
 ```
 
-Run the analyzer:
+---
+
+## 🚀 Usage
+
+### Analyze a Text File
+
+Place your text file inside the `inputs/` directory.
+
+Example:
+
+```text
+inputs/
+└── raw_text.txt
+```
+
+Run the application:
+
 ```bash
 python main.py
 ```
 
-If the input file is missing, the program will automatically prompt for manual text input.
-Enter your text and press Enter.
+The analysis results will be generated in:
+
+```text
+results/
+├── analysis.json
+└── text_analysis.txt
+```
+
+### Manual Text Input
+
+If no input file is found, the application automatically switches to manual input mode.
+
+Enter your text directly into the terminal and press Enter to begin analysis.
 
 ---
 
-## 📌 Example Output
-Sample 1: "Hello world! This is a test. Hello again."
-### Output:
-```
-Text Analysis Report
---------------------------------------------------
-Word Based Stats:
-Total Words: 8
-Unique Words: 7
-Longest Word: 'hello' (5 letters long)
---------------------------------------------------
-Character Stats:
-Total Characters (with spaces): 41
-Total Characters (without spaces): 34
---------------------------------------------------
-Sentence Based Stats:
-Total Sentences: 3
-Longest Sentence: 4 Words
-Shortest Sentence: 2 Words
-Avg. Sentence Length: 2.7 Words
-Avg. Sentence Characters: 13.7 Characters
---------------------------------------------------
-Paragraph Stats:
-Total Paragraphs: 1
-Avg. Sentences per Paragraph: 3.0
---------------------------------------------------
-Lexical Stats:
-Estimated Reading Time: 1.9 Seconds
-Estimated Speaking Time: 3.3 Seconds
-Vocabulary Richness Score: 87.50% (Small text sample - interpret cautiously)
---------------------------------------------------
-Frequency Based Stats:
-Most Frequent Word: 'hello' (2 times)
+## 🧪 Running Tests
 
-Top 5 Frequent Words:
-1. hello           →  2 times
-2. world           →  1 times
-3. this            →  1 times
-4. is              →  1 times
-5. a               →  1 times
+Execute the complete test suite:
 
-Top 5 Keywords (Stop words Excluded):
-1. hello           →  2 times
-2. world           →  1 times
-3. test            →  1 times
---------------------------------------------------
-REPORT ENDED
+```bash
+python -m pytest
 ```
+
+Run tests with coverage reporting:
+
+```bash
+python -m pytest --cov
+```
+
+Current test suite:
+
+- 155 automated tests
+- 99% code coverage
+- GitHub Actions CI validation
 
 ---
 
-## 🧠 What I Learned
+## 🛠️ Technologies Used
 
-Building this project taught me that writing working code and designing maintainable software are very different challenges.
+* **Python 3.13** – Core programming language
+* **Pytest** – Automated testing framework
+* **Pytest-Cov** – Code coverage reporting
+* **Git** – Version control
+* **GitHub** – Repository hosting and collaboration
+* **GitHub Actions** – Continuous Integration (CI)
+* **JSON** – Structured data export format
+* **Pathlib** – Cross-platform file system handling
+* **Regular Expressions (Regex)** – Pattern matching and text extraction
 
-Through multiple iterations and refactors, I gained practical experience with:
+## 🧩 Concepts Demonstrated
+
+### Software Design
+- Object-Oriented Programming (OOP)
+- Abstraction using Abstract Base Classes (ABC)
+- Polymorphism
+- Separation of Concerns (SoC)
+- Layered Architecture
+- Single Responsibility Principle (SRP)
+- Pipeline-Based Processing
+
+### Python Development
+- Static Methods
+- Dictionaries and Collections
+- List Comprehensions
+- Exception Handling
+- File Handling
+- JSON Serialization
+- Regular Expressions
+
+### Testing & Quality Assurance
+- Unit Testing
+- Integration Testing
+- Parametrized Testing
+- Fixtures
+- Exception Testing
+- Code Coverage Analysis
+
+### Continuous Integration (CI)
+- Development Workflow
+- Feature Branch Workflow
+- Automated Test Pipelines
+- Versioned Releases
+
+---
+
+## 📚 What I Learned
+
+Through building this project I gained practical experience with:
 
 - Object-Oriented Programming (OOP)
-- Layered software architecture
-- Separation of concerns
-- Shared execution contexts
-- File handling and persistence
-- JSON serialization and deserialization
-- Pathlib-based filesystem management
+- Layered Software Architecture
+- Refactoring Legacy Code
+- Regular Expressions
+- Automated Testing with Pytest
+- Code Coverage Analysis
+- Git & GitHub Workflows
+- Continuous Integration using GitHub Actions
+- Documentation and Project Maintenance
 
-More importantly, this project helped me develop a stronger understanding of how software evolves over time through incremental improvements rather than perfect upfront design.
+The project evolved from a simple script into a modular and fully tested software system through iterative development and continuous improvement.
 
 ---
 
-## 🗺️ Roadmap
+## 🔮 Future Improvements
 
-### ✅ Completed
+Potential future enhancements include:
 
-* Modular OOP Architecture
-* Shared Analysis Context
-* Layered Analyzer Pipeline
-* TXT Report Export
-* JSON Export
-* Pathlib Integration
-* Configuration Management
-
-### 🚧 In Progress
-
-* Regex-Based Text Parsing
-
-### 🔮 Planned
-
-* Unit Testing
-* Pandas Integration
-* SQL Fundamentals Integration
-* PostgreSQL-Based Persistence
-* Enhanced Text Processing & Analytics
-* GUI or Web Interface
+- Advanced readability analysis
+- Pandas-based data analysis features
+- Database integration
+- Web interface
+- Interactive visualizations
+- API support
 
 ---
 
